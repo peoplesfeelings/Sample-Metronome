@@ -14,20 +14,24 @@ import java.util.Comparator;
  */
 
 public class Storage {
+
+    static final float SENSITIVITY_FACTOR = 5;
+
     static final String SHARED_PREF_FILE_NAME = "pf-sm-file";
     static final boolean DEFAULT_SHARED_PREF_BOOL = false;
     static final int DEFAULT_SHARED_PREF_INT = -1;
     static final int DEFAULT_SHARED_PREF_FLOAT = -1;
+    static final int DEFAULT_SHARED_PREF_DOUBLE = -1;
     static final String DEFAULT_SHARED_PREF_STRING = "";
 
     static final String SHARED_PREF_HAS_RUN_KEY = "app has run before";
-    static final String SHARED_PREF_BPM_KEY = "initial bpm";
+    static final String SHARED_PREF_FTA_KEY = "full texture angle";
     static final String SHARED_PREF_RATE_KEY = "rate";
     static final String SHARED_PREF_SELECTED_FILE_KEY = "selected file";
 
     static final String[] SUPPORTED_FILE_EXTENSIONS = { "3gp", "mp4", "m4a", "aac", "flac", "mp3", "mkv", "wav", "ogg"};
 
-    static final float INITIAL_BPM = 120.0f;
+    static final double INITIAL_BPM = 120.0;
     static final int DEFAULT_RATE = 1;
 
     static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/");
@@ -106,6 +110,17 @@ public class Storage {
         return sharedPrefs.getFloat(key, DEFAULT_SHARED_PREF_FLOAT);
     }
 
+    //    double
+
+    static void setSharedPrefDouble(SharedPreferences.Editor editor, double value, String key, Context context) {
+        editor.putLong(key, Double.doubleToRawLongBits(value));
+        editor.commit();
+    }
+
+    static double getSharedPrefDouble(SharedPreferences sharedPrefs, String key, Context context) {
+        return Double.longBitsToDouble(sharedPrefs.getLong(key, Double.doubleToLongBits(DEFAULT_SHARED_PREF_DOUBLE)));
+    }
+
     //    bool
 
     static boolean getSharedPrefBool(String key, Context context) {
@@ -132,5 +147,15 @@ public class Storage {
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putString(key, s);
         editor.commit();
+    }
+
+    //////////////// bpm /  fta conversion ////////////////////////
+
+    static double bpmToFta (double bpm) {
+        return bpm / SENSITIVITY_FACTOR;
+    }
+
+    static double ftaToBpm (double fta) {
+        return fta * SENSITIVITY_FACTOR;
     }
 }
