@@ -8,13 +8,20 @@ import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
 public class ActivityMain extends AppCompatActivity {
 
+    HGDialV2 hgDialV2;
+    HGDialV2.IHGDial ihgDial;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        HGDialV2 hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
+        hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
 
+        setUpDial();
+    }
+
+    void setUpDial() {
         HGDialV2.IHGDial ihgDial = new HGDialV2.IHGDial() {
             @Override
             public void onDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -29,6 +36,5 @@ public class ActivityMain extends AppCompatActivity {
         };
 
         hgDialV2.registerCallback(ihgDial);
-
     }
 }
