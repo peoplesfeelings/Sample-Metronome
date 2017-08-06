@@ -46,9 +46,10 @@ public class ActivityMain extends AppCompatActivity {
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
             public void onUp(HGDialInfo hgDialInfo) {
-                double fta = Storage.ftaToBpm(hgDialV2.getFullTextureAngle());
+                double fta = hgDialV2.getFullTextureAngle();
+                double bpm = Storage.ftaToBpm(fta);
 
-                output.setText(Double.toString(fta));
+                output.setText(Double.toString(bpm));
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
             }

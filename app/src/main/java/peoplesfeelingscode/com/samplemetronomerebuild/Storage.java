@@ -15,7 +15,7 @@ import java.util.Comparator;
 
 public class Storage {
 
-    static final float SENSITIVITY_FACTOR = 5;
+    static final float SENSITIVITY_FACTOR = 9;
 
     static final String SHARED_PREF_FILE_NAME = "pf-sm-file";
     static final boolean DEFAULT_SHARED_PREF_BOOL = false;
