@@ -3,6 +3,7 @@ package peoplesfeelingscode.com.samplemetronomerebuild;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -48,6 +49,31 @@ public class ActivityMain extends AppCompatActivity {
         editor = sharedPrefs.edit();
 
         setUpDial();
+        setUpEditText();
+    }
+
+    void setUpEditText() {
+        textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String input = txtBpm.getText().toString();
+                if (input.length() > 0 && !input.equals(".")) {
+                    double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
+                    hgDialV2.doRapidDial(fta);
+                    hgDialV2.doManualGestureDial(fta);
+                    Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
+                    output.setText(Double.toString(Storage.ftaToBpm(hgDialV2.getFullTextureAngle())));
+                }
+            }
+        };
+
+        txtBpm.addTextChangedListener(textWatcher);
     }
 
     void setUpDial() {
@@ -82,7 +108,7 @@ public class ActivityMain extends AppCompatActivity {
         double fta = Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this);
 
         if (fta == -1) {
-            fta = Storage.bpmToFta(Storage.INITIAL_BPM);
+            fta = Storage.bpmToFta(Storage.DEFAULT_BPM);
         }
 
         output.setText(Double.toString(Storage.ftaToBpm(fta)));

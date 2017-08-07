@@ -15,7 +15,7 @@ import java.util.Comparator;
 
 public class Storage {
 
-    static final float SENSITIVITY_FACTOR = 9;
+    static final double SENSITIVITY_FACTOR = 9.0;
 
     static final String SHARED_PREF_FILE_NAME = "pf-sm-file";
     static final boolean DEFAULT_SHARED_PREF_BOOL = false;
@@ -31,7 +31,7 @@ public class Storage {
 
     static final String[] SUPPORTED_FILE_EXTENSIONS = { "3gp", "mp4", "m4a", "aac", "flac", "mp3", "mkv", "wav", "ogg"};
 
-    static final double INITIAL_BPM = 120.0;
+    static final double DEFAULT_BPM = 120.0;
     static final int DEFAULT_RATE = 1;
 
     static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/");

@@ -1,0 +1,5 @@
+test
+    multiple periods allowed in edittext
+
+bug
+    crashes if entering period first in edittext
