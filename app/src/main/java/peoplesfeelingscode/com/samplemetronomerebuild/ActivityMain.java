@@ -37,8 +37,6 @@ public class ActivityMain extends ActivityBase {
 
     FragmentMainActivityWelcome welcomeDialog;
 
-    TextView output;
-
     float rate;
 
     @Override
@@ -47,7 +45,6 @@ public class ActivityMain extends ActivityBase {
         setContentView(R.layout.activity_main);
 
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
-        output = (TextView) findViewById(R.id.output);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
         btnSamples = (Button) findViewById(R.id.btnSamples);
         btnStartStop = (Button) findViewById(R.id.btnStartStop);
@@ -161,7 +158,6 @@ public class ActivityMain extends ActivityBase {
                     hgDialV2.doRapidDial(fta);
                     hgDialV2.doManualGestureDial(fta);
                     Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
-                    output.setText(Double.toString(Storage.ftaToBpm(hgDialV2.getFullTextureAngle())));
                 }
             }
         };
@@ -177,7 +173,7 @@ public class ActivityMain extends ActivityBase {
             public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
-                output.setText(Double.toString(Storage.ftaToBpm(hgDialV2.getFullTextureAngle())));
+                txtBpm.setText(Double.toString(Storage.ftaToBpm(hgDialV2.getFullTextureAngle())));
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -186,7 +182,7 @@ public class ActivityMain extends ActivityBase {
                 double fta = hgDialV2.getFullTextureAngle();
                 double bpm = Storage.ftaToBpm(fta);
 
-                output.setText(Double.toString(bpm));
+                txtBpm.setText(Double.toString(bpm));
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
             }
@@ -204,7 +200,7 @@ public class ActivityMain extends ActivityBase {
             fta = Storage.bpmToFta(Storage.DEFAULT_BPM);
         }
 
-        output.setText(Double.toString(Storage.ftaToBpm(fta)));
+        txtBpm.setText(Double.toString(Storage.ftaToBpm(fta)));
 
         hgDialV2.doRapidDial(fta);
         hgDialV2.doManualGestureDial(fta);
