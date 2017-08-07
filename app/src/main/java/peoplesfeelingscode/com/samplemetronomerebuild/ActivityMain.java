@@ -5,6 +5,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -32,6 +37,8 @@ public class ActivityMain extends AppCompatActivity {
 
     TextView output;
 
+    float rate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +57,57 @@ public class ActivityMain extends AppCompatActivity {
 
         setUpDial();
         setUpEditText();
+        setUpSpinner();
+    }
+
+    void setUpSpinner() {
+        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rates)) {
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = super.getView(position, convertView, parent);
+                ((TextView) v).setGravity(Gravity.CENTER);
+                return v;
+            }
+            public View getDropDownView(int position, View convertView,ViewGroup parent) {
+                View v = super.getDropDownView(position, convertView,parent);
+                ((TextView) v).setGravity(Gravity.CENTER);
+                return v;
+            }
+        };
+
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        rateSpinner.setAdapter(spinnerAdapter);
+
+        rateSpinner.setSelection(Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this));
+
+        rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
+                rate = rateSpinnerPosToFloat(pos);
+                Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
+                Log.d("*********", "" + rate);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
+        Log.d("**********", "" + rate);
+    }
+
+    float rateSpinnerPosToFloat(int pos) {
+        switch(pos) {
+            case 0:
+                return 0.5f;
+            case 1:
+                return 1f;
+            case 2:
+                return 2f;
+            case 3:
+                return 4f;
+        }
+
+        return -1;
     }
 
     void setUpEditText() {
