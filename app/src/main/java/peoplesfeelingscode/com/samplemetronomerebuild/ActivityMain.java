@@ -3,6 +3,10 @@ package peoplesfeelingscode.com.samplemetronomerebuild;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextWatcher;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.WarwickWestonWright.HGDialV2.HGDialInfo;
@@ -16,6 +20,15 @@ public class ActivityMain extends AppCompatActivity {
     SharedPreferences sharedPrefs;
     SharedPreferences.Editor editor;
 
+    TextView txtBpm;
+    Button btnSamples;
+    Button btnStartStop;
+    Spinner rateSpinner;
+    TextView txtAbout;
+
+    TextWatcher textWatcher;
+    ArrayAdapter<String> spinnerAdapter;
+
     TextView output;
 
     @Override
@@ -25,6 +38,11 @@ public class ActivityMain extends AppCompatActivity {
 
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         output = (TextView) findViewById(R.id.output);
+        txtBpm = (TextView) findViewById(R.id.txtBpm);
+        btnSamples = (Button) findViewById(R.id.btnSamples);
+        btnStartStop = (Button) findViewById(R.id.btnStartStop);
+        rateSpinner = (Spinner) findViewById(R.id.rateSpinner);
+        txtAbout = (TextView) findViewById(R.id.txtAbout);
 
         sharedPrefs = getSharedPreferences(Storage.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
         editor = sharedPrefs.edit();
@@ -33,7 +51,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     void setUpDial() {
-        HGDialV2.IHGDial ihgDial = new HGDialV2.IHGDial() {
+        ihgDial = new HGDialV2.IHGDial() {
             @Override
             public void onDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
