@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape>
+            <solid android:color="@color/borderBoxOutline" />
+        </shape>
+    </item>
+    <item
+        android:top="@dimen/border_box_outline"
+        android:bottom="@dimen/border_box_outline"
+        android:left="@dimen/border_box_outline"
+        android:right="@dimen/border_box_outline">
+        <shape>
+            <solid android:color="@color/borderBoxBG" />
+        </shape>
+    </item>
+</layer-list>

@@ -3,4 +3,26 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+
+    <!--app palette-->
+
+    <color name="lightest">#eeeeee</color>
+    <color name="lightGrey">#bbbbbb</color>
+    <color name="mediumGrey">#777777</color>
+    <color name="darkGrey">#333333</color>
+
+    <color name="theColor">#276c2d</color>
+
+    <!--intermediary variables-->
+
+    <color name="bg">@color/darkGrey</color>
+    <color name="lines">@color/mediumGrey</color>
+    <color name="borderBoxBG">@color/bg</color>
+    <color name="borderBoxOutline">@color/lines</color>
+    <color name="listItemBG">@color/bg</color>
+    <color name="listItemBG_Pressed">@color/mediumGrey</color>
+    <color name="listItemTxt">@color/lightGrey</color>
+    <color name="textOverTheColor">@color/lightest</color>
+
 </resources>

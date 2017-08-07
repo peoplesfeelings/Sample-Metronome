@@ -1,8 +1,8 @@
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.WarwickWestonWright.HGDialV2.HGDialInfo;
 import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
-public class ActivityMain extends AppCompatActivity {
+public class ActivityMain extends ActivityBase {
 
     HGDialV2 hgDialV2;
     HGDialV2.IHGDial ihgDial;
@@ -64,6 +64,35 @@ public class ActivityMain extends AppCompatActivity {
         setUpDial();
         setUpEditText();
         setUpSpinner();
+        setUpListeners();
+    }
+
+    void setUpListeners() {
+//        btnSamples.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                startActivity(new Intent(ActivityMain.this, ActivitySample.class));
+//            }
+//        });
+//        btnStartStop.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (!loopRunning) {
+//                    loopRunning = true;
+//                    btnStartStop.setText(getResources().getString(R.string.btnStop));
+//                    loop();
+//                } else {
+//                    btnStartStop.setText(getResources().getString(R.string.btnStart));
+//                    loopRunning = false;
+//                }
+//            }
+//        });
+        txtAbout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ActivityMain.this, ActivityAbout.class));
+            }
+        });
     }
 
     void setUpSpinner() {

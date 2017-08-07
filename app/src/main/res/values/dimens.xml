@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--pallette-->
+
+    <dimen name="border_radius">4dp</dimen>
+    <dimen name="line">1dp</dimen>
+
+    <!--intermediate variables-->
+
+    <dimen name="activity_horizontal_margin">1dp</dimen>
+    <dimen name="activity_vertical_margin">1dp</dimen>
+    <dimen name="border_box_outline">@dimen/line</dimen>
+    <dimen name="border_box_padding_and_margin">5dp</dimen>
+    <dimen name="toast_border_rad">@dimen/border_radius</dimen>
+
+</resources>
