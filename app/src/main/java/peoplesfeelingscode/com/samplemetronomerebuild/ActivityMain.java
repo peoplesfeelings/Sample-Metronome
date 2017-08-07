@@ -68,12 +68,12 @@ public class ActivityMain extends ActivityBase {
     }
 
     void setUpListeners() {
-//        btnSamples.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                startActivity(new Intent(ActivityMain.this, ActivitySample.class));
-//            }
-//        });
+        btnSamples.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ActivityMain.this, ActivitySample.class));
+            }
+        });
 //        btnStartStop.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
