@@ -35,6 +35,8 @@ public class ActivityMain extends AppCompatActivity {
     TextWatcher textWatcher;
     ArrayAdapter<String> spinnerAdapter;
 
+    FragmentMainActivityWelcome welcomeDialog;
+
     TextView output;
 
     float rate;
@@ -54,6 +56,10 @@ public class ActivityMain extends AppCompatActivity {
 
         sharedPrefs = getSharedPreferences(Storage.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
         editor = sharedPrefs.edit();
+
+        welcomeDialog = new FragmentMainActivityWelcome();
+
+        checkIfFirstRun();
 
         setUpDial();
         setUpEditText();
@@ -173,5 +179,22 @@ public class ActivityMain extends AppCompatActivity {
 
         hgDialV2.doRapidDial(fta);
         hgDialV2.doManualGestureDial(fta);
+    }
+
+    void checkIfFirstRun() {
+        boolean hasRunBefore = Storage.getSharedPrefBool(Storage.SHARED_PREF_HAS_RUN_KEY, this);
+
+        if (!hasRunBefore) {
+            Storage.makeDirectoryIfNeeded();
+
+            //set default settings
+            Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
+            Storage.setSharedPrefInt(Storage.DEFAULT_RATE, Storage.SHARED_PREF_RATE_KEY, this);
+
+            Storage.setSharedPref(true, Storage.SHARED_PREF_HAS_RUN_KEY, this);
+
+            welcomeDialog.show(getFragmentManager().beginTransaction(), "");
+        }
+
     }
 }
