@@ -69,6 +69,7 @@ public class ActivityMain extends AppCompatActivity {
 
         output.setText(Double.toString(Storage.ftaToBpm(fta)));
 
-        hgDialV2.setFullTextureAngle(fta);
+        hgDialV2.doRapidDial(fta);
+        hgDialV2.doManualGestureDial(fta);
     }
 }
