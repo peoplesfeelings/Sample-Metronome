@@ -18,6 +18,8 @@ import android.widget.TextView;
 import com.WarwickWestonWright.HGDialV2.HGDialInfo;
 import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
+import java.util.Timer;
+
 public class ActivityMain extends ActivityBase {
 
     HGDialV2 hgDialV2;
@@ -37,7 +39,14 @@ public class ActivityMain extends ActivityBase {
 
     FragmentMainActivityWelcome welcomeDialog;
 
+    Timer timer;
+
     float rate;
+    boolean loopRunning;
+    long timeReference;
+    long lastCycle = System.currentTimeMillis();
+    int cycle = 0;
+    long period;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +65,43 @@ public class ActivityMain extends ActivityBase {
 
         welcomeDialog = new FragmentMainActivityWelcome();
 
+        timer = new Timer();
+
         checkIfFirstRun();
 
         setUpDial();
         setUpEditText();
         setUpSpinner();
         setUpListeners();
+
+        rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
+    }
+
+    void loop() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (loopRunning) {
+                    if (System.currentTimeMillis() > lastCycle + period) {
+                        cycle++;
+                        lastCycle = timeReference + cycle * period;
+                        Log.d("****************", "HI");
+                    }
+                }
+            }
+        }).start();
+    }
+
+    void setPeriod() {
+        timeReference = System.currentTimeMillis();
+        cycle = 0;
+        lastCycle = System.currentTimeMillis();
+
+        double bpm = Storage.ftaToBpm(hgDialV2.getFullTextureAngle());
+        double beat = 60000 / bpm;
+        int intervalMillis = (int) (beat / rate);
+
+        period = intervalMillis;
     }
 
     void setUpListeners() {
@@ -71,19 +111,20 @@ public class ActivityMain extends ActivityBase {
                 startActivity(new Intent(ActivityMain.this, ActivitySample.class));
             }
         });
-//        btnStartStop.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (!loopRunning) {
-//                    loopRunning = true;
-//                    btnStartStop.setText(getResources().getString(R.string.btnStop));
-//                    loop();
-//                } else {
-//                    btnStartStop.setText(getResources().getString(R.string.btnStart));
-//                    loopRunning = false;
-//                }
-//            }
-//        });
+        btnStartStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!loopRunning) {
+                    loopRunning = true;
+                    setPeriod();
+                    btnStartStop.setText(getResources().getString(R.string.btnStop));
+                    loop();
+                } else {
+                    btnStartStop.setText(getResources().getString(R.string.btnStart));
+                    loopRunning = false;
+                }
+            }
+        });
         txtAbout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -157,6 +198,7 @@ public class ActivityMain extends ActivityBase {
                     double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
                     hgDialV2.doRapidDial(fta);
                     hgDialV2.doManualGestureDial(fta);
+                    setPeriod();
                     Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                 }
             }
@@ -174,6 +216,7 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
                 txtBpm.setText(Double.toString(Storage.ftaToBpm(hgDialV2.getFullTextureAngle())));
+                setPeriod();
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -183,6 +226,7 @@ public class ActivityMain extends ActivityBase {
                 double bpm = Storage.ftaToBpm(fta);
 
                 txtBpm.setText(Double.toString(bpm));
+                setPeriod();
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
             }
