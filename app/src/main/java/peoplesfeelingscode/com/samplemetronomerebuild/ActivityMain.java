@@ -1,7 +1,12 @@
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,13 +19,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.WarwickWestonWright.HGDialV2.HGDialInfo;
 import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
+import java.io.File;
 import java.util.Timer;
 
 public class ActivityMain extends ActivityBase {
+
+    static final int MAX_STREAMS = 16;
 
     HGDialV2 hgDialV2;
     HGDialV2.IHGDial ihgDial;
@@ -47,6 +56,10 @@ public class ActivityMain extends ActivityBase {
     long lastCycle = System.currentTimeMillis();
     int cycle = 0;
     long period;
+
+    String fileLocation;
+    int soundId;
+    SoundPool sounds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +88,41 @@ public class ActivityMain extends ActivityBase {
         setUpListeners();
 
         rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
+
+        createSoundPool();
+
+        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+    }
+
+    protected void createSoundPool() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            createNewSoundPool();
+        } else {
+            createOldSoundPool();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    protected void createNewSoundPool(){
+        AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        sounds = new SoundPool.Builder()
+                .setAudioAttributes(attributes)
+                .setMaxStreams(MAX_STREAMS)
+                .build();
+    }
+
+    @SuppressWarnings("deprecation")
+    protected void createOldSoundPool(){
+        sounds = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC,0);
     }
 
     void loop() {
@@ -85,11 +133,31 @@ public class ActivityMain extends ActivityBase {
                     if (System.currentTimeMillis() > lastCycle + period) {
                         cycle++;
                         lastCycle = timeReference + cycle * period;
-                        Log.d("****************", "HI");
+                        int success = sounds.play(soundId, 1, 1, 1, 0, 1f);
+                        if (success == 0) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast toast = Toast.makeText(ActivityMain.this, R.string.toastFileNotSelectedOrCorrupt, Toast.LENGTH_LONG);
+                                    toast.show();
+                                    btnStartStop.setText(getResources().getString(R.string.btnStart));
+                                }
+                            });
+                            Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
+                            loopRunning = false;
+                            break;
+                        }
                     }
                 }
             }
         }).start();
+    }
+
+    void loadFile(String fileName) {
+        if (!fileName.isEmpty()) {
+            fileLocation = Storage.path + File.separator + fileName;
+            soundId = sounds.load(fileLocation, 1);
+        }
     }
 
     void setPeriod() {

@@ -44,7 +44,7 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
         }
 
         holder.txt.setText(files.get(pos).name);
-        if (files.get(pos).name.equals(Storage.selectedFileName)) {
+        if (files.get(pos).name.equals(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, activity))) {
             holder.chk.setChecked(true);
         } else {
             holder.chk.setChecked(false);
@@ -62,14 +62,11 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
                     }
                     cb.setChecked(true);
 
-                    Storage.selectedFileName = files.get(pos).name;
-                    Storage.fileNeedsToBeLoaded = true;
-                    Storage.setSharedPrefString(Storage.selectedFileName, Storage.SHARED_PREF_SELECTED_FILE_KEY, activity);
+                    Storage.setSharedPrefString(files.get(pos).name, Storage.SHARED_PREF_SELECTED_FILE_KEY, activity);
                 }
             }
         });
 
         return v;
     }
-
 }

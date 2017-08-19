@@ -36,9 +36,6 @@ public class Storage {
 
     static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/");
 
-    static String selectedFileName;
-    static boolean fileNeedsToBeLoaded;
-
     //////////////// write stuff /////////////////
 
     static void makeDirectoryIfNeeded() {
