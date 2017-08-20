@@ -201,7 +201,6 @@ public class ActivityMain extends ActivityBase {
                 } else {
                     btnStartStop.setText(getResources().getString(R.string.btnStart));
                     loopRunning = false;
-                    lastCycle = 0L;
                 }
             }
         });
