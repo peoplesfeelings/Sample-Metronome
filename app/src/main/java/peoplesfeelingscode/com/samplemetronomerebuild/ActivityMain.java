@@ -130,6 +130,9 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void run() {
                 while (loopRunning) {
+//                    Log.d("loop() *********", "System.currentTimeMillis(): " + System.currentTimeMillis());
+//                    Log.d("loop() *********", "lastCycle: " + lastCycle);
+//                    Log.d("loop() *********", "period: " + period);
                     if (System.currentTimeMillis() > lastCycle + period) {
                         cycle++;
                         lastCycle = timeReference + cycle * period;
@@ -147,6 +150,7 @@ public class ActivityMain extends ActivityBase {
                             loopRunning = false;
                             break;
                         }
+                        Log.d("************", "sound");
                     }
                 }
             }
@@ -161,9 +165,14 @@ public class ActivityMain extends ActivityBase {
     }
 
     void setPeriod() {
-        timeReference = System.currentTimeMillis();
+//        Log.d("**********", "lastCycle != 0L: " + (lastCycle != 0L));
+        if (lastCycle != 0L && loopRunning) {
+            timeReference = lastCycle;
+        } else {
+            timeReference = System.currentTimeMillis();
+            lastCycle = System.currentTimeMillis();
+        }
         cycle = 0;
-        lastCycle = System.currentTimeMillis();
 
         double bpm = Storage.ftaToBpm(hgDialV2.getFullTextureAngle());
         double beat = 60000 / bpm;
@@ -183,13 +192,16 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onClick(View view) {
                 if (!loopRunning) {
-                    loopRunning = true;
+//                    Log.d("**********", "System.currentTimeMillis() - (lastCycle + period): " + (System.currentTimeMillis() - (lastCycle + period)));
                     setPeriod();
+
+                    loopRunning = true;
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
                     loop();
                 } else {
                     btnStartStop.setText(getResources().getString(R.string.btnStart));
                     loopRunning = false;
+                    lastCycle = 0L;
                 }
             }
         });
