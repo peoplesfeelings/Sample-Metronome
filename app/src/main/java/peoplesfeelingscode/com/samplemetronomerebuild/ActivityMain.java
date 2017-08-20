@@ -129,14 +129,34 @@ public class ActivityMain extends ActivityBase {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                /* begin wet sound thing */
+
+                int success = sounds.play(soundId, 1, 1, 1, 0, 1f);
+                if (success == 0) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast toast = Toast.makeText(ActivityMain.this, R.string.toastFileNotSelectedOrCorrupt, Toast.LENGTH_LONG);
+                            toast.show();
+                            btnStartStop.setText(getResources().getString(R.string.btnStart));
+                        }
+                    });
+                    Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
+                    loopRunning = false;
+                }
+                Log.d("************", "sound");
+
+                /* end wet sound thing */
+
                 while (loopRunning) {
-//                    Log.d("loop() *********", "System.currentTimeMillis(): " + System.currentTimeMillis());
-//                    Log.d("loop() *********", "lastCycle: " + lastCycle);
-//                    Log.d("loop() *********", "period: " + period);
                     if (System.currentTimeMillis() > lastCycle + period) {
                         cycle++;
                         lastCycle = timeReference + cycle * period;
-                        int success = sounds.play(soundId, 1, 1, 1, 0, 1f);
+
+                        /* begin wet sound thing */
+
+                        success = sounds.play(soundId, 1, 1, 1, 0, 1f);
                         if (success == 0) {
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -151,6 +171,9 @@ public class ActivityMain extends ActivityBase {
                             break;
                         }
                         Log.d("************", "sound");
+
+                        /* end wet sound thing */
+
                     }
                 }
             }
@@ -165,12 +188,15 @@ public class ActivityMain extends ActivityBase {
     }
 
     void setPeriod() {
-//        Log.d("**********", "lastCycle != 0L: " + (lastCycle != 0L));
+        /*
+        loopRunning bool is assigned true after setPeriod() is called in btnStartStop handler so the following
+        should only be true if bpm is being changed while loop is running
+        */
         if (lastCycle != 0L && loopRunning) {
             timeReference = lastCycle;
         } else {
             timeReference = System.currentTimeMillis();
-            lastCycle = System.currentTimeMillis();
+            lastCycle = timeReference;
         }
         cycle = 0;
 
@@ -192,9 +218,7 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onClick(View view) {
                 if (!loopRunning) {
-//                    Log.d("**********", "System.currentTimeMillis() - (lastCycle + period): " + (System.currentTimeMillis() - (lastCycle + period)));
                     setPeriod();
-
                     loopRunning = true;
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
                     loop();
