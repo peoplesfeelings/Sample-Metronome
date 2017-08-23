@@ -87,8 +87,6 @@ public class ActivityMain extends ActivityBase {
         setUpSpinner();
         setUpListeners();
 
-        rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
-
         createSoundPool();
 
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
@@ -253,8 +251,6 @@ public class ActivityMain extends ActivityBase {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         rateSpinner.setAdapter(spinnerAdapter);
 
-        rateSpinner.setSelection(Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this));
-
         rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
@@ -267,6 +263,7 @@ public class ActivityMain extends ActivityBase {
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
 
+        rateSpinner.setSelection(Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this));
         rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
     }
 
