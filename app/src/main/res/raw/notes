@@ -1,3 +1,6 @@
+do
+    store and load rate in sharedpref
+
 test
     multiple periods allowed in edittext
 

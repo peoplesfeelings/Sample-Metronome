@@ -50,7 +50,7 @@ public class ActivityMain extends ActivityBase {
 
     Timer timer;
 
-    float rate;
+    double rate;
     boolean loopRunning;
     long timeReference;
     long lastCycle = System.currentTimeMillis();
@@ -259,8 +259,8 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
                 rate = rateSpinnerPosToFloat(pos);
+                setPeriod();
                 Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
-                Log.d("*********", "" + rate);
             }
 
             @Override
@@ -268,19 +268,18 @@ public class ActivityMain extends ActivityBase {
         });
 
         rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
-        Log.d("**********", "" + rate);
     }
 
-    float rateSpinnerPosToFloat(int pos) {
+    double rateSpinnerPosToFloat(int pos) {
         switch(pos) {
             case 0:
-                return 0.5f;
+                return 0.5;
             case 1:
-                return 1f;
+                return 1;
             case 2:
-                return 2f;
+                return 2;
             case 3:
-                return 4f;
+                return 4;
         }
 
         return -1;
