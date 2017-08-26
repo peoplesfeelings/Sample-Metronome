@@ -8,6 +8,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,7 +25,10 @@ import android.widget.Toast;
 import com.WarwickWestonWright.HGDialV2.HGDialInfo;
 import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Timer;
 
 public class ActivityMain extends ActivityBase {
@@ -90,6 +94,32 @@ public class ActivityMain extends ActivityBase {
         createSoundPool();
 
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+
+        testFileThing();
+    }
+
+    void testFileThing() {
+        InputStream ins = getResources().openRawResource(R.raw.distant_explosion);
+        ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+        int size = 0;
+
+        byte[] buffer = new byte[1024];
+        try {
+            while((size=ins.read(buffer,0,1024))>=0){
+                outputStream.write(buffer,0,size);
+            }
+            ins.close();
+        } catch (Exception e) {
+            Log.d("***********", "error");
+        }
+        buffer=outputStream.toByteArray();
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/", "test.flac"));
+            fos.write(buffer);
+            fos.close();
+        } catch (Exception e) {
+            Log.d("***********", "error2");
+        }
     }
 
     @Override
