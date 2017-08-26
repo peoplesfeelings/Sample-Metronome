@@ -1,10 +1,16 @@
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.util.Log;
+import android.util.Pair;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,6 +43,19 @@ public class Storage {
     static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/");
 
     static boolean fileNeedsToBeLoaded;
+
+    static Pair[] samplePack = {
+            new Pair(R.raw.distant_explosion, "distant_explosion.flac"),
+            new Pair(R.raw.guitar_hit_1, "guitar_hit_1.flac"),
+            new Pair(R.raw.guitar_hit_2, "guitar_hit_2.flac"),
+            new Pair(R.raw.guitar_hit_3, "guitar_hit_3.flac"),
+            new Pair(R.raw.guitar_hit_4, "guitar_hit_4.flac"),
+            new Pair(R.raw.guitar_hit_5, "guitar_hit_5.flac"),
+            new Pair(R.raw.guitar_hit_6, "guitar_hit_6.flac"),
+            new Pair(R.raw.guitar_hit_7, "guitar_hit_7.flac"),
+            new Pair(R.raw.hh_closed, "hh_closed.flac"),
+            new Pair(R.raw.snare, "snare.flac"),
+    };
 
     //////////////// write stuff /////////////////
 
@@ -77,6 +96,35 @@ public class Storage {
         });
 
         return fileList;
+    }
+
+    //////////////// read/write stuff /////////////////
+
+    static void writeSamplePack(Activity activity) {
+
+        for (int i = 0; i < samplePack.length; i++) {
+            InputStream ins = activity.getResources().openRawResource((int) samplePack[i].first);
+            ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+            int size = 0;
+
+            byte[] buffer = new byte[1024];
+            try {
+                while((size=ins.read(buffer,0,1024))>=0){
+                    outputStream.write(buffer,0,size);
+                }
+                ins.close();
+            } catch (Exception e) {
+                Log.d("***********", "error");
+            }
+            buffer=outputStream.toByteArray();
+            try {
+                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/", (String) samplePack[i].second));
+                fos.write(buffer);
+                fos.close();
+            } catch (Exception e) {
+                Log.d("***********", "error2");
+            }
+        }
     }
 
     //////////////// shared pref ////////////////////////
