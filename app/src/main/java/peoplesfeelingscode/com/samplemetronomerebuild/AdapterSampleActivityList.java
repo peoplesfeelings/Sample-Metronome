@@ -63,6 +63,7 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
                     cb.setChecked(true);
 
                     Storage.setSharedPrefString(files.get(pos).name, Storage.SHARED_PREF_SELECTED_FILE_KEY, activity);
+                    Storage.fileNeedsToBeLoaded = true;
                 }
             }
         });

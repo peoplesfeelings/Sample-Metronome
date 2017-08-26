@@ -148,6 +148,9 @@ public class ActivityMain extends ActivityBase {
                 /* end wet sound thing */
 
                 while (loopRunning) {
+                    if (Storage.fileNeedsToBeLoaded) {
+                        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this));
+                    }
                     if (System.currentTimeMillis() > lastCycle + period) {
                         cycle++;
                         lastCycle = timeReference + cycle * period;
@@ -182,6 +185,7 @@ public class ActivityMain extends ActivityBase {
         if (!fileName.isEmpty()) {
             fileLocation = Storage.path + File.separator + fileName;
             soundId = sounds.load(fileLocation, 1);
+            Storage.fileNeedsToBeLoaded = false;
         }
     }
 
