@@ -29,13 +29,12 @@
                 android:id="@+id/textView1" />
 
             <TextView
-                android:text="@string/txtApacheV2"
+                android:text="@string/txtRepo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/border_box"
                 android:layout_margin="@dimen/border_box_padding_and_margin"
-                android:padding="@dimen/border_box_padding_and_margin"
-                android:id="@+id/textView2" />
+                android:padding="@dimen/border_box_padding_and_margin"/>
 
             <TextView
                 android:text="@string/txtAcknowledgements"
@@ -45,6 +44,15 @@
                 android:layout_margin="@dimen/border_box_padding_and_margin"
                 android:padding="@dimen/border_box_padding_and_margin"
                 android:id="@+id/thing"/>
+
+            <TextView
+                android:text="@string/txtLicense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_box"
+                android:layout_margin="@dimen/border_box_padding_and_margin"
+                android:padding="@dimen/border_box_padding_and_margin"
+                android:id="@+id/textView2" />
         </LinearLayout>
     </ScrollView>
 
