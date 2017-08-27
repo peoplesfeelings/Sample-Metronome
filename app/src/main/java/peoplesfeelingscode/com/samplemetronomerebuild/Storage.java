@@ -66,7 +66,6 @@ public class Storage {
     static boolean fileNeedsToBeLoaded;
 
     static Pair[] samplePack = {
-            new Pair(R.raw.distant_explosion, "distant_explosion.flac"),
             new Pair(R.raw.guitar_hit_1, "guitar_hit_1.flac"),
             new Pair(R.raw.guitar_hit_2, "guitar_hit_2.flac"),
             new Pair(R.raw.guitar_hit_3, "guitar_hit_3.flac"),
@@ -74,8 +73,6 @@ public class Storage {
             new Pair(R.raw.guitar_hit_5, "guitar_hit_5.flac"),
             new Pair(R.raw.guitar_hit_6, "guitar_hit_6.flac"),
             new Pair(R.raw.guitar_hit_7, "guitar_hit_7.flac"),
-            new Pair(R.raw.hh_closed, "hh_closed.flac"),
-            new Pair(R.raw.snare, "snare.flac"),
     };
 
     //////////////// write stuff /////////////////

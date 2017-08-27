@@ -1,4 +1,6 @@
 do
+    fix bpm from being negative
+    get sound to not be over half for headphones
 
 test
     multiple periods allowed in edittext

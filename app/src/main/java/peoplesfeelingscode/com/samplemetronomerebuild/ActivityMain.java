@@ -62,7 +62,6 @@ public class ActivityMain extends ActivityBase {
     Button btnSamples;
     Button btnStartStop;
     Spinner rateSpinner;
-    TextView txtAbout;
 
     TextWatcher textWatcher;
     ArrayAdapter<String> spinnerAdapter;
@@ -92,7 +91,6 @@ public class ActivityMain extends ActivityBase {
         btnSamples = (Button) findViewById(R.id.btnSamples);
         btnStartStop = (Button) findViewById(R.id.btnStartStop);
         rateSpinner = (Spinner) findViewById(R.id.rateSpinner);
-        txtAbout = (TextView) findViewById(R.id.txtAbout);
 
         sharedPrefs = getSharedPreferences(Storage.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
         editor = sharedPrefs.edit();
@@ -249,12 +247,6 @@ public class ActivityMain extends ActivityBase {
                     btnStartStop.setText(getResources().getString(R.string.btnStart));
                     loopRunning = false;
                 }
-            }
-        });
-        txtAbout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(ActivityMain.this, ActivityAbout.class));
             }
         });
     }
