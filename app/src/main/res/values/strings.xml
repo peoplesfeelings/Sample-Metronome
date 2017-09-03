@@ -5,7 +5,7 @@
         <item>2 per beat</item>
         <item>4 per beat</item>
     </string-array>
-    <string name="app_name">Sample Metronome Rebuild</string>
+    <string name="app_name">Precise Sample Metronome</string>
     <string name="btnAbout">About</string>
     <string name="btnOk">Ok</string>
     <string name="btnSamples">Samples</string>
