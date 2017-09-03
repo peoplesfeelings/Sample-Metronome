@@ -68,7 +68,7 @@
 
         <com.WarwickWestonWright.HGDialV2.HGDialV2
             android:id="@+id/hgDialV2"
-            app:HGDialV2Drawable="@drawable/hg_dial_v2"
+            app:HGDialV2Drawable="@drawable/dial2_fit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
