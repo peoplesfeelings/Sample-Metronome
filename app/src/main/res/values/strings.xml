@@ -11,7 +11,7 @@
     <string name="btnSamples">Samples</string>
     <string name="btnStart">Start</string>
     <string name="btnStop">Stop</string>
-    <string name="dialogInstruction">Add your sample files to directory: Documents/Sample_Metronome/</string>
+    <string name="dialogInstruction">Add your sample files to directory: Documents/Precise_Sample_Metronome/</string>
     <string name="dialogNoFiles">No files found</string>
     <string name="menuAbout">About</string>
     <string name="titleMain">@string/app_name</string>

@@ -61,7 +61,7 @@ public class Storage {
     static final double DEFAULT_BPM = 120.0;
     static final int DEFAULT_RATE = 1;
 
-    static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/");
+    static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Precise_Sample_Metronome/");
 
     static boolean fileNeedsToBeLoaded;
 
@@ -136,7 +136,7 @@ public class Storage {
             }
             buffer=outputStream.toByteArray();
             try {
-                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Sample_Metronome/", (String) samplePack[i].second));
+                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Precise_Sample_Metronome/", (String) samplePack[i].second));
                 fos.write(buffer);
                 fos.close();
             } catch (Exception e) {
