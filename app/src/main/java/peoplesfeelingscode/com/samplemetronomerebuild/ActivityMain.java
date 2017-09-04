@@ -331,14 +331,14 @@ public class ActivityMain extends ActivityBase {
             public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
-                txtBpm.setText(Double.toString(Storage.ftaToBpm(hgDialV2.getFullTextureAngle())));
+                txtBpm.setText(Double.toString(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()))));
                 setPeriod();
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
             public void onUp(HGDialInfo hgDialInfo) {
-                double fta = hgDialV2.getFullTextureAngle();
+                double fta = preventNegative(hgDialV2.getFullTextureAngle());
                 double bpm = Storage.ftaToBpm(fta);
 
                 txtBpm.setText(Double.toString(bpm));
@@ -351,6 +351,16 @@ public class ActivityMain extends ActivityBase {
         hgDialV2.registerCallback(ihgDial);
 
         loadStoredAngle();
+    }
+
+    double preventNegative(double fta) {
+        if (fta < 0) {
+            hgDialV2.setFullTextureAngle(0);
+
+            return 0;
+        }
+
+        return fta;
     }
 
     void loadStoredAngle() {
