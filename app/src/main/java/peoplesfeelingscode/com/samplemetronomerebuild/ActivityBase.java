@@ -69,7 +69,7 @@ public class ActivityBase extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //
+                    Storage.writeSamplePack(this);
                 } else {
                     Toast toast = new Toast(this);
                     toast.setView(getLayoutInflater().inflate(R.layout.toast, null));
