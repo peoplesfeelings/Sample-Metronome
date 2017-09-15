@@ -117,6 +117,13 @@ public class ActivityMain extends ActivityBase {
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        loopRunning = false;
+    }
+
     protected void createSoundPool() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             createNewSoundPool();
@@ -129,7 +136,7 @@ public class ActivityMain extends ActivityBase {
     protected void createNewSoundPool(){
         AudioAttributes attributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build();
         sounds = new SoundPool.Builder()
                 .setAudioAttributes(attributes)
