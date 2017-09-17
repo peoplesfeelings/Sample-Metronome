@@ -1,12 +1,3 @@
 do
-    fix bpm from being negative
     get sound to not be over half for headphones
 
-test
-    multiple periods allowed in edittext
-
-bug
-    crashes if entering period first in edittext
-
-check
-    license / about page - correct content

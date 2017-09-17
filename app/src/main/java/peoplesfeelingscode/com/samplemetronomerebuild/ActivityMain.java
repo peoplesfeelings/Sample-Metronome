@@ -109,12 +109,15 @@ public class ActivityMain extends ActivityBase {
         createSoundPool();
 
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+
+        Log.d("***************", "onCreate()");
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+//        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+        Log.d("***************", "onRestart()");
     }
 
     @Override
@@ -122,6 +125,31 @@ public class ActivityMain extends ActivityBase {
         super.onDestroy();
 
         loopRunning = false;
+        Log.d("***************", "onDestroy()");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("***************", "onStart()");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("***************", "onStop()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("***************", "onResume()");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("***************", "onPause()");
     }
 
     protected void createSoundPool() {
@@ -166,7 +194,7 @@ public class ActivityMain extends ActivityBase {
                             btnStartStop.setText(getResources().getString(R.string.btnStart));
                         }
                     });
-                    Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
+//                    Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
                     loopRunning = false;
                 }
                 Log.d("************", "sound");
@@ -193,7 +221,7 @@ public class ActivityMain extends ActivityBase {
                                     btnStartStop.setText(getResources().getString(R.string.btnStart));
                                 }
                             });
-                            Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
+//                            Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
                             loopRunning = false;
                             break;
                         }
@@ -208,7 +236,9 @@ public class ActivityMain extends ActivityBase {
     }
 
     void loadFile(String fileName) {
-        if (!fileName.isEmpty()) {
+        if (fileName.isEmpty()) {
+            //
+        } else {
             fileLocation = Storage.path + File.separator + fileName;
             soundId = sounds.load(fileLocation, 1);
             Storage.fileNeedsToBeLoaded = false;
