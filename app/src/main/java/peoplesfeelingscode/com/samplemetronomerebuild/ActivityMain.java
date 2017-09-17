@@ -386,6 +386,8 @@ public class ActivityMain extends ActivityBase {
         };
 
         hgDialV2.registerCallback(ihgDial);
+        hgDialV2.setFlingTolerance(100, 500);
+        hgDialV2.setSpinAnimation(0,0,4000);
 
         loadStoredAngle();
     }
