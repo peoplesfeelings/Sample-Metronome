@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +63,7 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
         }
 
         holder.txt.setText(files.get(pos).name);
+
         if (files.get(pos).name.equals(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, activity))) {
             holder.chk.setChecked(true);
         } else {

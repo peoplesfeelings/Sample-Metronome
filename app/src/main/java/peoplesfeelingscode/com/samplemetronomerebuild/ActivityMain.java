@@ -21,14 +21,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -49,6 +53,9 @@ import java.io.File;
 import java.util.Timer;
 
 public class ActivityMain extends ActivityBase {
+
+    final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
+    int permissionCheck;
 
     static final int MAX_STREAMS = 16;
 
@@ -110,13 +117,12 @@ public class ActivityMain extends ActivityBase {
 
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
 
-        Log.d("***************", "onCreate()");
+        getPermissionForWrite();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-//        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
         Log.d("***************", "onRestart()");
     }
 
@@ -181,25 +187,10 @@ public class ActivityMain extends ActivityBase {
         new Thread(new Runnable() {
             @Override
             public void run() {
-
-                /* begin wet sound thing */
-
-                int success = sounds.play(soundId, 1, 1, 1, 0, 1f);
-                if (success == 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
-                            toast.show();
-                            btnStartStop.setText(getResources().getString(R.string.btnStart));
-                        }
-                    });
-//                    Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
-                    loopRunning = false;
+                if (Storage.fileNeedsToBeLoaded) {
+                    loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this));
                 }
-                Log.d("************", "sound");
-
-                /* end wet sound thing */
+                sounds.play(soundId, 1, 1, 1, 0, 1f);
 
                 while (loopRunning) {
                     if (Storage.fileNeedsToBeLoaded) {
@@ -209,26 +200,7 @@ public class ActivityMain extends ActivityBase {
                         cycle++;
                         lastCycle = timeReference + cycle * period;
 
-                        /* begin wet sound thing */
-
-                        success = sounds.play(soundId, 1, 1, 1, 0, 1f);
-                        if (success == 0) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
-                                    toast.show();
-                                    btnStartStop.setText(getResources().getString(R.string.btnStart));
-                                }
-                            });
-//                            Storage.setSharedPrefString("", Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this);
-                            loopRunning = false;
-                            break;
-                        }
-                        Log.d("************", "sound");
-
-                        /* end wet sound thing */
-
+                        sounds.play(soundId, 1, 1, 1, 0, 1f);
                     }
                 }
             }
@@ -236,13 +208,9 @@ public class ActivityMain extends ActivityBase {
     }
 
     void loadFile(String fileName) {
-        if (fileName.isEmpty()) {
-            //
-        } else {
-            fileLocation = Storage.path + File.separator + fileName;
-            soundId = sounds.load(fileLocation, 1);
-            Storage.fileNeedsToBeLoaded = false;
-        }
+        fileLocation = Storage.path + File.separator + fileName;
+        soundId = sounds.load(fileLocation, 1);
+        Storage.fileNeedsToBeLoaded = false;
     }
 
     void setPeriod() {
@@ -276,6 +244,11 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onClick(View view) {
                 if (!loopRunning) {
+                    if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
+                        Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
+                        toast.show();
+                        return;
+                    }
                     setPeriod();
                     loopRunning = true;
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
@@ -424,6 +397,7 @@ public class ActivityMain extends ActivityBase {
             //set default settings
             Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
             Storage.setSharedPrefInt(Storage.DEFAULT_RATE, Storage.SHARED_PREF_RATE_KEY, this);
+            Storage.setSharedPrefString(Storage.DEFAULT_SELECTED_FILE_STRING, Storage.SHARED_PREF_SELECTED_FILE_KEY, this);
 
             Storage.setSharedPref(true, Storage.SHARED_PREF_HAS_RUN_KEY, this);
 
@@ -432,5 +406,40 @@ public class ActivityMain extends ActivityBase {
             Storage.writeSamplePack(this);
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Storage.writeSamplePack(this);
+                    loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+                } else {
+                    Toast toast = new Toast(this);
+                    toast.setView(getLayoutInflater().inflate(R.layout.toast, null));
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    TextView text = (TextView) toast.getView().findViewById(R.id.txt);
+                    text.setText(getResources().getString(R.string.toastWritePermissionNotGranted));
+                    toast.show();
+
+                    finish();
+                }
+                return;
+            }
+        }
+    }
+
+    private void getPermissionForWrite() {
+        permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
+        } else {
+            //
+        }
     }
 }

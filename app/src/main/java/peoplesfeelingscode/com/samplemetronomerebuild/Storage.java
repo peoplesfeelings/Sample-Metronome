@@ -50,6 +50,7 @@ public class Storage {
     static final int DEFAULT_SHARED_PREF_FLOAT = -1;
     static final int DEFAULT_SHARED_PREF_DOUBLE = -1;
     static final String DEFAULT_SHARED_PREF_STRING = "";
+    static final String DEFAULT_SELECTED_FILE_STRING = "guitar_hit_5.flac";
 
     static final String SHARED_PREF_HAS_RUN_KEY = "app has run before";
     static final String SHARED_PREF_FTA_KEY = "full texture angle";
