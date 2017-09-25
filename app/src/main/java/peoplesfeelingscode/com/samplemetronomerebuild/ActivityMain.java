@@ -193,6 +193,7 @@ public class ActivityMain extends ActivityBase {
                 if (Storage.fileNeedsToBeLoaded) {
                     loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this));
                 }
+                lastCycle = System.currentTimeMillis();
                 sounds.play(soundId, 1, 1, 1, 0, 1f);
 
                 while (loopRunning) {
