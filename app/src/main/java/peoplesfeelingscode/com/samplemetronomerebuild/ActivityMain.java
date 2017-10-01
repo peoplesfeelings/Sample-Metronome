@@ -132,6 +132,7 @@ public class ActivityMain extends ActivityBase {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Storage.writeSamplePack(this);
+                    Storage.writeNoMediaFile(this);
                     loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
                 } else {
                     Toast toast = new Toast(this);
@@ -408,6 +409,7 @@ public class ActivityMain extends ActivityBase {
             welcomeDialog.show(getFragmentManager().beginTransaction(), "");
 
             Storage.writeSamplePack(this);
+            Storage.writeNoMediaFile(this);
         }
 
     }

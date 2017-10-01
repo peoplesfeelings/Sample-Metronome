@@ -146,6 +146,16 @@ public class Storage {
         }
     }
 
+    static void writeNoMediaFile(Activity activity) {
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Precise_Sample_Metronome/", ".nomedia"));
+            fos.write(null);
+            fos.close();
+        } catch (Exception e) {
+            Log.d("***********", "error2");
+        }
+    }
+
     //////////////// shared pref ////////////////////////
 
     //    int
