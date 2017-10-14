@@ -1,19 +1,33 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="AppTheme" parent="Theme.AppCompat">
+
+        <!--appcompat attributes-->
+
+            <!--colors-->
+
+                <item name="colorPrimary">@color/colorPrimary</item>
+                <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+                <item name="colorAccent">@color/colorAccent</item>
+
+            <!--styles-->
+
+                <item name="actionBarStyle">@style/myABStyle</item>
     </style>
 
     <!--appcompat parent -->
 
-    <!--check box-->
-    <style name="CheckBoxStyle" parent="Widget.AppCompat.CompoundButton.CheckBox">
-        <item name="colorAccent">#888888</item>
-        <item name="android:textColorSecondary">#888888</item>
-    </style>
+        <!--action bar-->
+        <style name="myABStyle" parent="@style/Widget.AppCompat.ActionBar">
+            <!--action bar background-->
+            <item name="background">@drawable/border_bottom</item>
+        </style>
+
+        <!--check box-->
+        <style name="CheckBoxStyle" parent="Widget.AppCompat.CompoundButton.CheckBox">
+            <item name="colorAccent">#888888</item>
+            <item name="android:textColorSecondary">#888888</item>
+        </style>
 
 </resources>

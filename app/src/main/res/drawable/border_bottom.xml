@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape>
+            <solid android:color="@color/actionBarOutline" />
+        </shape>
+    </item>
+    <item android:bottom="@dimen/action_bar_outline">
+        <shape>
+            <solid android:color="@color/actionBarBG" />
+        </shape>
+    </item>
+</layer-list>

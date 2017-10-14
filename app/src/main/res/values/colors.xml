@@ -5,7 +5,7 @@
     <color name="colorAccent">#FF4081</color>
 
 
-    <!--app palette-->
+    <!-- palette -->
 
     <color name="lightest">#eeeeee</color>
     <color name="lightGrey">#bbbbbb</color>
@@ -14,10 +14,15 @@
 
     <color name="theColor">#276c2d</color>
 
-    <!--intermediary variables-->
+    <!-- standardized -->
 
     <color name="bg">@color/darkGrey</color>
     <color name="lines">@color/mediumGrey</color>
+
+    <!-- intermediary -->
+
+    <color name="actionBarBG">@color/bg</color>
+    <color name="actionBarOutline">@color/lines</color>
     <color name="borderBoxBG">@color/bg</color>
     <color name="borderBoxOutline">@color/lines</color>
     <color name="listItemBG">@color/bg</color>
