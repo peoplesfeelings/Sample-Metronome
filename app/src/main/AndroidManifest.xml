@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="peoplesfeelingscode.com.samplemetronomerebuild">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />'
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    '
     <application
         android:allowBackup="true"
         android:icon="@mipmap/icon"
@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ActivityMain"
+        <activity
+            android:name=".ActivityMain"
             android:configChanges="orientation|screenSize"
             android:label="@string/titleMain"
             android:launchMode="singleTask">
@@ -22,14 +23,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".ActivityBase" />
-        <activity android:name=".ActivitySample"
+        <activity
+            android:name=".ActivitySample"
             android:configChanges="orientation|screenSize"
             android:label="@string/titleSamples"
-            android:launchMode="singleTask"></activity>
-        <activity android:name=".ActivityAbout"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".ActivityAbout"
             android:configChanges="orientation|screenSize"
             android:label="@string/titleAbout"
-            android:launchMode="singleTask"></activity>
+            android:launchMode="singleTask" />
+
     </application>
 
 </manifest>
