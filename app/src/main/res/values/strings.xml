@@ -14,6 +14,9 @@
     <string name="dialogInstruction">Add your sample files to directory: Documents/Precise_Sample_Metronome/</string>
     <string name="dialogNoFiles">No files found</string>
     <string name="menuAbout">About</string>
+    <string name="notifTitle">notification title2</string>
+    <string name="notifTicker">ticker text2</string>
+    <string name="notifText">notification text2</string>
     <string name="titleMain">@string/app_name</string>
     <string name="titleSamples">Samples</string>
     <string name="titleAbout">About</string>

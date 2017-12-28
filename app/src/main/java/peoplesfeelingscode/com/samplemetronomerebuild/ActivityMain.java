@@ -118,7 +118,7 @@ public class ActivityMain extends ActivityBase {
 
         createSoundPool();
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
-        
+
         getPermissionForWrite();
 
         setUpServiceConnection();
@@ -146,7 +146,7 @@ public class ActivityMain extends ActivityBase {
         super.onDestroy();
 
         loopRunning = false;
-        if (!service.looping) {
+        if (!service.loopRunning) {
             stopService(new Intent(this, MyService.class));
         }
 
@@ -177,13 +177,15 @@ public class ActivityMain extends ActivityBase {
     }
 
     void doBindService() {
-        if (!Dry.serviceRunning(this, MyService.class)) {
-            startService(new Intent(ActivityMain.this, MyService.class));
+        Context context = getApplicationContext();
+        if (!Dry.serviceRunning(context, MyService.class)) {
+            startService(new Intent(context, MyService.class));
+
             Log.d("*************", "activity - inside service not running block");
         }
 
         if (!bound) {
-            Intent intent = new Intent(ActivityMain.this, MyService.class);
+            Intent intent = new Intent(context, MyService.class);
             bindService(intent, connection, Context.BIND_ABOVE_CLIENT);
             bound = true;
         }
@@ -204,7 +206,6 @@ public class ActivityMain extends ActivityBase {
                 service = binder.getService();
 
                 Log.d("*************", "serviceconnection connected");
-                Log.d("*************", "serviceconnection service: " + service.getClass());
             }
 
             @Override
@@ -317,19 +318,26 @@ public class ActivityMain extends ActivityBase {
         btnStartStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!loopRunning) {
-                    if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
-                        Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
-                        toast.show();
-                        return;
-                    }
-                    setPeriod();
-                    loopRunning = true;
+//                if (!loopRunning) {
+//                    if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
+//                        Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
+//                        toast.show();
+//                        return;
+//                    }
+//                    setPeriod();
+//                    loopRunning = true;
+//                    btnStartStop.setText(getResources().getString(R.string.btnStop));
+//                    loop();
+//                } else {
+//                    btnStartStop.setText(getResources().getString(R.string.btnStart));
+//                    loopRunning = false;
+//                }
+                if (!service.loopRunning) {
+                    service.start();
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
-                    loop();
                 } else {
                     btnStartStop.setText(getResources().getString(R.string.btnStart));
-                    loopRunning = false;
+                    service.stop();
                 }
             }
         });
