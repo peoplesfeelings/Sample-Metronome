@@ -76,7 +76,6 @@ public class MyService extends Service {
 
     class MyBinder extends Binder {
         MyService getService() {
-            Log.d("**************", "myservice getservice");
             return MyService.this;
         }
     }

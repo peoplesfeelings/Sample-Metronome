@@ -206,6 +206,10 @@ public class ActivityMain extends ActivityBase {
             public void onServiceConnected(ComponentName className, IBinder iBinder) {
                 MyService.MyBinder binder = (MyService.MyBinder) iBinder;
                 service = binder.getService();
+                
+                if (service.loopRunning) {
+                    btnStartStop.setText(getResources().getString(R.string.btnStop));
+                }
 
                 Log.d("*************", "serviceconnection connected");
             }
