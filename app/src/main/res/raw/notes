@@ -1,16 +1,27 @@
-style status bar color
-service
-    declare the service as private in manifest
-    set as foreground
-    create a new thread within the service
-    override
-        onStartCommand()
-        onCreate()
-        onDestroy()
-    ensure available to only your app by including the android:exported attribute and setting it to false
-    stop it by calling stopService()
-    start the service by calling startService() and passing an Intent that specifies the service and includes any data for the service to use
-        service receives this Intent in the onStartCommand() method
-    do icon
-    check
-        sound notification not played when started
+to do
+    style status bar color
+    service
+        declare the service as private in manifest
+        set as foreground
+        create a new thread within the service
+        override
+            onStartCommand()
+            onCreate()
+            onDestroy()
+        ensure available to only your app by including the android:exported attribute and setting it to false
+        stop it by calling stopService()
+        start the service by calling startService() and passing an Intent that specifies the service and includes any data for the service to use
+            service receives this Intent in the onStartCommand() method
+        do icon
+        check
+            sound notification not played when started
+
+activity
+    ondestroy
+        if (not looping)
+            stop service
+    on stop
+        unbind
+    on start
+        if service running
+            bind

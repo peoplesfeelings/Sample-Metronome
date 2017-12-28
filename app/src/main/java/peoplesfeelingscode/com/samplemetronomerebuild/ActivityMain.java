@@ -23,7 +23,10 @@ package peoplesfeelingscode.com.samplemetronomerebuild;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
@@ -31,10 +34,12 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +57,9 @@ import java.io.File;
 import java.util.Timer;
 
 public class ActivityMain extends ActivityBase {
+    MyService service;
+    ServiceConnection connection;
+    boolean bound;
 
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
     int permissionCheck;
@@ -92,6 +100,7 @@ public class ActivityMain extends ActivityBase {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        bound = false;
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
         btnSamples = (Button) findViewById(R.id.btnSamples);
@@ -117,6 +126,25 @@ public class ActivityMain extends ActivityBase {
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
 
         getPermissionForWrite();
+
+        setUpServiceConnection();
+        doBindService();
+
+        Log.d("******************", "activity oncreate");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        doBindService();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        doUnbindService();
     }
 
     @Override
@@ -124,6 +152,11 @@ public class ActivityMain extends ActivityBase {
         super.onDestroy();
 
         loopRunning = false;
+        if (!service.looping) {
+            stopService(new Intent(this, MyService.class));
+        }
+
+        Log.d("******************", "activity ondestroy");
     }
 
     @Override
@@ -149,7 +182,49 @@ public class ActivityMain extends ActivityBase {
         }
     }
 
-    private void getPermissionForWrite() {
+    void doBindService() {
+        if (!Dry.serviceRunning(this, MyService.class)) {
+            startService(new Intent(ActivityMain.this, MyService.class));
+            Log.d("*************", "activity - inside service not running block");
+        }
+
+        if (!bound) {
+            Intent intent = new Intent(ActivityMain.this, MyService.class);
+            bindService(intent, connection, Context.BIND_ABOVE_CLIENT);
+            bound = true;
+        }
+    }
+
+    void doUnbindService() {
+        if (bound) {
+            unbindService(connection);
+            bound = false;
+        }
+    }
+
+    void setUpServiceConnection() {
+        connection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder iBinder) {
+                MyService.MyBinder binder = (MyService.MyBinder) iBinder;
+                service = binder.getService();
+
+                Log.d("*************", "serviceconnection connected");
+                Log.d("*************", "serviceconnection service: " + service.getClass());
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+                MyService.MyBinder binder = null;
+                service = null;
+                bound = false;
+                
+                Log.d("*************", "serviceconnection disconnected");
+            }
+        };
+    }
+
+    void getPermissionForWrite() {
         permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
@@ -162,7 +237,7 @@ public class ActivityMain extends ActivityBase {
         }
     }
 
-    protected void createSoundPool() {
+    void createSoundPool() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             createNewSoundPool();
         } else {
@@ -171,7 +246,7 @@ public class ActivityMain extends ActivityBase {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    protected void createNewSoundPool(){
+    void createNewSoundPool(){
         AudioAttributes attributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -183,7 +258,7 @@ public class ActivityMain extends ActivityBase {
     }
 
     @SuppressWarnings("deprecation")
-    protected void createOldSoundPool(){
+    void createOldSoundPool(){
         sounds = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC,0);
     }
 

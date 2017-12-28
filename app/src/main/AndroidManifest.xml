@@ -34,6 +34,10 @@
             android:label="@string/titleAbout"
             android:launchMode="singleTask" />
 
+        <service
+            android:name=".MyService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>
