@@ -97,7 +97,9 @@ public class ActivityMain extends ActivityBase {
         setContentView(R.layout.activity_main);
 
         bound = false;
+
         lastCycle = System.currentTimeMillis();
+
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
         btnSamples = (Button) findViewById(R.id.btnSamples);
@@ -210,7 +212,6 @@ public class ActivityMain extends ActivityBase {
 
             @Override
             public void onServiceDisconnected(ComponentName arg0) {
-                MyService.MyBinder binder = null;
                 service = null;
                 bound = false;
 
