@@ -16,12 +16,5 @@ to do
         check
             sound notification not played when started
 
-activity
-    ondestroy
-        if (not looping)
-            stop service
-    on stop
-        unbind
-    on start
-        if service running
-            bind
+check
+    after install, what happens if, in onRequestPermissionsResult, service is null

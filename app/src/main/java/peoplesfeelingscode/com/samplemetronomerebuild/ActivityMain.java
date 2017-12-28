@@ -22,17 +22,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.media.SoundPool;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
@@ -53,11 +48,8 @@ import android.widget.Toast;
 import com.WarwickWestonWright.HGDialV2.HGDialInfo;
 import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
-import java.io.File;
-
 public class ActivityMain extends ActivityBase {
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
-    static final int MAX_STREAMS = 16;
 
     int permissionCheck;
 
@@ -80,25 +72,12 @@ public class ActivityMain extends ActivityBase {
 
     FragmentMainActivityWelcome welcomeDialog;
 
-    double rate;
-    boolean loopRunning;
-    long timeReference;
-    long lastCycle;
-    int cycle = 0;
-    long period;
-
-    String fileLocation;
-    int soundId;
-    SoundPool sounds;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         bound = false;
-
-        lastCycle = System.currentTimeMillis();
 
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
@@ -111,20 +90,12 @@ public class ActivityMain extends ActivityBase {
 
         welcomeDialog = new FragmentMainActivityWelcome();
 
-        checkIfFirstRun();
-
-        setUpDial();
-        setUpEditText();
-        setUpSpinner();
-        setUpListeners();
-
-        createSoundPool();
-        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
-
-        getPermissionForWrite();
-
         setUpServiceConnection();
         doBindService();
+
+        checkIfFirstRun();
+
+        getPermissionForWrite();
 
         Log.d("******************", "activity oncreate");
     }
@@ -147,8 +118,7 @@ public class ActivityMain extends ActivityBase {
     protected void onDestroy() {
         super.onDestroy();
 
-        loopRunning = false;
-        if (!service.loopRunning) {
+        if (bound && !service.loopRunning) {
             stopService(new Intent(this, MyService.class));
         }
 
@@ -162,7 +132,11 @@ public class ActivityMain extends ActivityBase {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Storage.writeSamplePack(this);
                     Storage.writeNoMediaFile(this);
-                    loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+                    if (bound) {
+                        service.loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+                    } else {
+                        // ?
+                    }
                 } else {
                     Toast toast = new Toast(this);
                     toast.setView(getLayoutInflater().inflate(R.layout.toast, null));
@@ -206,10 +180,15 @@ public class ActivityMain extends ActivityBase {
             public void onServiceConnected(ComponentName className, IBinder iBinder) {
                 MyService.MyBinder binder = (MyService.MyBinder) iBinder;
                 service = binder.getService();
-                
+
                 if (service.loopRunning) {
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
                 }
+
+                setUpDial();
+                setUpEditText();
+                setUpSpinner();
+                setUpListeners();
 
                 Log.d("*************", "serviceconnection connected");
             }
@@ -237,82 +216,6 @@ public class ActivityMain extends ActivityBase {
         }
     }
 
-    void createSoundPool() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            createNewSoundPool();
-        } else {
-            createOldSoundPool();
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    void createNewSoundPool(){
-        AudioAttributes attributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build();
-        sounds = new SoundPool.Builder()
-                .setAudioAttributes(attributes)
-                .setMaxStreams(MAX_STREAMS)
-                .build();
-    }
-
-    @SuppressWarnings("deprecation")
-    void createOldSoundPool(){
-        sounds = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC,0);
-    }
-
-    void loop() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (Storage.fileNeedsToBeLoaded) {
-                    loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this));
-                }
-                lastCycle = System.currentTimeMillis();
-                sounds.play(soundId, 1, 1, 1, 0, 1f);
-
-                while (loopRunning) {
-                    if (Storage.fileNeedsToBeLoaded) {
-                        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this));
-                    }
-                    if (System.currentTimeMillis() > lastCycle + period) {
-                        cycle++;
-                        lastCycle = timeReference + cycle * period;
-
-                        sounds.play(soundId, 1, 1, 1, 0, 1f);
-                    }
-                }
-            }
-        }).start();
-    }
-
-    void loadFile(String fileName) {
-        fileLocation = Storage.path + File.separator + fileName;
-        soundId = sounds.load(fileLocation, 1);
-        Storage.fileNeedsToBeLoaded = false;
-    }
-
-    void setPeriod() {
-        /*
-        loopRunning bool is assigned true after setPeriod() is called in btnStartStop handler so the following
-        should only be true if bpm is being changed while loop is running
-        */
-        if (lastCycle != 0L && loopRunning) {
-            timeReference = lastCycle;
-        } else {
-            timeReference = System.currentTimeMillis();
-            lastCycle = timeReference;
-        }
-        cycle = 0;
-
-        double bpm = Storage.ftaToBpm(hgDialV2.getFullTextureAngle());
-        double beat = 60000 / bpm;
-        int intervalMillis = (int) (beat / rate);
-
-        period = intervalMillis;
-    }
-
     void setUpListeners() {
         btnSamples.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -323,19 +226,19 @@ public class ActivityMain extends ActivityBase {
         btnStartStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                if (!loopRunning) {
+//                if (!service.loopRunning) {
 //                    if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
 //                        Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
 //                        toast.show();
 //                        return;
 //                    }
-//                    setPeriod();
-//                    loopRunning = true;
+//                    service.setPeriod(hgDialV2.getFullTextureAngle());
+//                    service.loopRunning = true;
 //                    btnStartStop.setText(getResources().getString(R.string.btnStop));
-//                    loop();
+//                    service.loop();
 //                } else {
 //                    btnStartStop.setText(getResources().getString(R.string.btnStart));
-//                    loopRunning = false;
+//                    service.loopRunning = false;
 //                }
                 if (!service.loopRunning) {
                     service.start();
@@ -368,8 +271,8 @@ public class ActivityMain extends ActivityBase {
         rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-                rate = rateSpinnerPosToFloat(pos);
-                setPeriod();
+                service.rate = rateSpinnerPosToFloat(pos);
+                service.setPeriod(hgDialV2.getFullTextureAngle());
                 Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
             }
 
@@ -378,7 +281,7 @@ public class ActivityMain extends ActivityBase {
         });
 
         rateSpinner.setSelection(Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this));
-        rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
+        service.rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
     }
 
     double rateSpinnerPosToFloat(int pos) {
@@ -411,7 +314,7 @@ public class ActivityMain extends ActivityBase {
                     double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
                     hgDialV2.doRapidDial(fta);
                     hgDialV2.doManualGestureDial(fta);
-                    setPeriod();
+                    service.setPeriod(hgDialV2.getFullTextureAngle());
                     Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                 }
             }
@@ -429,7 +332,7 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
                 txtBpm.setText(Double.toString(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()))));
-                setPeriod();
+                service.setPeriod(hgDialV2.getFullTextureAngle());
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -439,7 +342,7 @@ public class ActivityMain extends ActivityBase {
                 double bpm = Storage.ftaToBpm(fta);
 
                 txtBpm.setText(Double.toString(bpm));
-                setPeriod();
+                service.setPeriod(hgDialV2.getFullTextureAngle());
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
             }
