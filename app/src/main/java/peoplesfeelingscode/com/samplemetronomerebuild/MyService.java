@@ -7,12 +7,17 @@ import android.os.IBinder;
 import android.util.Log;
 
 public class MyService extends Service {
-    private final IBinder mBinder;
+    IBinder mBinder;
     boolean looping;
 
-    public MyService() {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
         mBinder = new MyBinder();
         looping = false;
+
+        Log.d("**************", "service oncreate");
     }
 
     @Override
@@ -23,20 +28,13 @@ public class MyService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-
-        Log.d("**************", "service oncreate");
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
 
         Log.d("**************", "service ondestroy");
     }
 
-    public class MyBinder extends Binder {
+    class MyBinder extends Binder {
         MyService getService() {
             Log.d("**************", "myservice getservice");
             return MyService.this;

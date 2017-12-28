@@ -54,17 +54,16 @@ import com.WarwickWestonWright.HGDialV2.HGDialInfo;
 import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
 import java.io.File;
-import java.util.Timer;
 
 public class ActivityMain extends ActivityBase {
+    final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
+    static final int MAX_STREAMS = 16;
+
+    int permissionCheck;
+
     MyService service;
     ServiceConnection connection;
     boolean bound;
-
-    final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
-    int permissionCheck;
-
-    static final int MAX_STREAMS = 16;
 
     HGDialV2 hgDialV2;
     HGDialV2.IHGDial ihgDial;
@@ -76,18 +75,15 @@ public class ActivityMain extends ActivityBase {
     Button btnSamples;
     Button btnStartStop;
     Spinner rateSpinner;
-
     TextWatcher textWatcher;
     ArrayAdapter<String> spinnerAdapter;
 
     FragmentMainActivityWelcome welcomeDialog;
 
-    Timer timer;
-
     double rate;
     boolean loopRunning;
     long timeReference;
-    long lastCycle = System.currentTimeMillis();
+    long lastCycle;
     int cycle = 0;
     long period;
 
@@ -101,6 +97,7 @@ public class ActivityMain extends ActivityBase {
         setContentView(R.layout.activity_main);
 
         bound = false;
+        lastCycle = System.currentTimeMillis();
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
         btnSamples = (Button) findViewById(R.id.btnSamples);
@@ -112,8 +109,6 @@ public class ActivityMain extends ActivityBase {
 
         welcomeDialog = new FragmentMainActivityWelcome();
 
-        timer = new Timer();
-
         checkIfFirstRun();
 
         setUpDial();
@@ -122,9 +117,8 @@ public class ActivityMain extends ActivityBase {
         setUpListeners();
 
         createSoundPool();
-
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
-
+        
         getPermissionForWrite();
 
         setUpServiceConnection();
@@ -218,7 +212,7 @@ public class ActivityMain extends ActivityBase {
                 MyService.MyBinder binder = null;
                 service = null;
                 bound = false;
-                
+
                 Log.d("*************", "serviceconnection disconnected");
             }
         };
@@ -486,6 +480,5 @@ public class ActivityMain extends ActivityBase {
             Storage.writeSamplePack(this);
             Storage.writeNoMediaFile(this);
         }
-
     }
 }
