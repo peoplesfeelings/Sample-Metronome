@@ -1,5 +1,14 @@
+for release
+    version data
+        mani
+        gradl
+        string
+    github
+
+replicate
+
 to do
     style status bar color
 
 check
-    after install, what happens if, in onRequestPermissionsResult, service is null
+    does service.loadFile fail gracefully on first start, before permission is granted

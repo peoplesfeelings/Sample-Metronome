@@ -132,12 +132,11 @@ public class ActivityMain extends ActivityBase {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Storage.makeDirectoryIfNeeded();
                     Storage.writeSamplePack(this);
                     Storage.writeNoMediaFile(this);
                     if (bound) {
                         service.loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
-                    } else {
-                        // ?
                     }
                 } else {
                     Toast toast = new Toast(this);
@@ -385,8 +384,6 @@ public class ActivityMain extends ActivityBase {
         boolean hasRunBefore = Storage.getSharedPrefBool(Storage.SHARED_PREF_HAS_RUN_KEY, this);
 
         if (!hasRunBefore) {
-            Storage.makeDirectoryIfNeeded();
-
             //set default settings
             Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
             Storage.setSharedPrefInt(Storage.DEFAULT_RATE, Storage.SHARED_PREF_RATE_KEY, this);
@@ -396,6 +393,7 @@ public class ActivityMain extends ActivityBase {
 
             welcomeDialog.show(getFragmentManager().beginTransaction(), "");
 
+            Storage.makeDirectoryIfNeeded();
             Storage.writeSamplePack(this);
             Storage.writeNoMediaFile(this);
         }

@@ -62,7 +62,7 @@ public class Storage {
     static final double DEFAULT_BPM = 120.0;
     static final int DEFAULT_RATE = 1;
 
-    static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Precise_Sample_Metronome/");
+    static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/");
 
     static boolean fileNeedsToBeLoaded;
 
@@ -93,6 +93,43 @@ public class Storage {
         }
     }
 
+    static void writeNoMediaFile(Activity activity) {
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/", ".nomedia"));
+            fos.write(null);
+            fos.close();
+        } catch (Exception e) {
+            Log.d("***********", "error3");
+        }
+    }
+
+    static void writeSamplePack(Activity activity) {
+
+        for (int i = 0; i < samplePack.length; i++) {
+            InputStream ins = activity.getResources().openRawResource((int) samplePack[i].first);
+            ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+            int size = 0;
+
+            byte[] buffer = new byte[1024];
+            try {
+                while((size=ins.read(buffer,0,1024))>=0){
+                    outputStream.write(buffer,0,size);
+                }
+                ins.close();
+            } catch (Exception e) {
+                Log.d("***********", "error");
+            }
+            buffer=outputStream.toByteArray();
+            try {
+                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/", (String) samplePack[i].second));
+                fos.write(buffer);
+                fos.close();
+            } catch (Exception e) {
+                Log.d("***********", "error2");
+            }
+        }
+    }
+
     //////////////// read stuff /////////////////
 
     static ArrayList<ObjectFile> getFileList() {
@@ -115,45 +152,6 @@ public class Storage {
         });
 
         return fileList;
-    }
-
-    //////////////// read/write stuff /////////////////
-
-    static void writeSamplePack(Activity activity) {
-
-        for (int i = 0; i < samplePack.length; i++) {
-            InputStream ins = activity.getResources().openRawResource((int) samplePack[i].first);
-            ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
-            int size = 0;
-
-            byte[] buffer = new byte[1024];
-            try {
-                while((size=ins.read(buffer,0,1024))>=0){
-                    outputStream.write(buffer,0,size);
-                }
-                ins.close();
-            } catch (Exception e) {
-                Log.d("***********", "error");
-            }
-            buffer=outputStream.toByteArray();
-            try {
-                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Precise_Sample_Metronome/", (String) samplePack[i].second));
-                fos.write(buffer);
-                fos.close();
-            } catch (Exception e) {
-                Log.d("***********", "error2");
-            }
-        }
-    }
-
-    static void writeNoMediaFile(Activity activity) {
-        try {
-            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Documents/Precise_Sample_Metronome/", ".nomedia"));
-            fos.write(null);
-            fos.close();
-        } catch (Exception e) {
-            Log.d("***********", "error2");
-        }
     }
 
     //////////////// shared pref ////////////////////////
