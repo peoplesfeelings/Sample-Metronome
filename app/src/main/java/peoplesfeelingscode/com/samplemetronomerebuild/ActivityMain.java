@@ -48,6 +48,8 @@ import android.widget.Toast;
 import com.WarwickWestonWright.HGDialV2.HGDialInfo;
 import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
+import java.io.File;
+
 public class ActivityMain extends ActivityBase {
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
 
@@ -226,27 +228,28 @@ public class ActivityMain extends ActivityBase {
         btnStartStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                if (!service.loopRunning) {
-//                    if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
-//                        Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
-//                        toast.show();
-//                        return;
-//                    }
-//                    service.setPeriod(hgDialV2.getFullTextureAngle());
-//                    service.loopRunning = true;
-//                    btnStartStop.setText(getResources().getString(R.string.btnStop));
-//                    service.loop();
-//                } else {
-//                    btnStartStop.setText(getResources().getString(R.string.btnStart));
-//                    service.loopRunning = false;
-//                }
+
+
+
+
+
                 if (!service.loopRunning) {
+                    if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
+                        Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
+                        toast.show();
+                        return;
+                    }
+                    service.setPeriod(hgDialV2.getFullTextureAngle());
                     service.start();
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
                 } else {
                     btnStartStop.setText(getResources().getString(R.string.btnStart));
                     service.stop();
                 }
+
+
+
+
             }
         });
     }

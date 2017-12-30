@@ -71,6 +71,7 @@ public class MyService extends Service {
     void start() {
         startForeground(ONGOING_NOTIFICATION_ID, notification);
         loopRunning = true;
+        loop();
 
         Log.d("*************", "service - start");
     }
