@@ -8,7 +8,5 @@ for release
 replicate
 
 to do
-    style status bar color
 
 check
-    does service.loadFile fail gracefully on first start, before permission is granted
