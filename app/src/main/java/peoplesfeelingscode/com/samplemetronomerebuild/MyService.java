@@ -157,7 +157,8 @@ public class MyService extends Service {
     void setPeriod(double fta) {
         /*
         loopRunning bool is assigned true after setPeriod() is called in btnStartStop handler so the following
-        should only be true if bpm is being changed while loop is running
+        should only be true if bpm is being changed while loop is running. this allows smooth change of tempo
+        while metronome is playing
         */
         if (lastCycle != 0L && loopRunning) {
             timeReference = lastCycle;
