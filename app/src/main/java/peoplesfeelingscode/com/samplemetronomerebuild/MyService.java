@@ -93,7 +93,7 @@ public class MyService extends Service {
                         .setPriority(Notification.PRIORITY_HIGH)
                         .setContentTitle(getText(R.string.notifTitle))
                         .setContentText(getText(R.string.notifText))
-                        .setSmallIcon(R.drawable.notif_ic_18)
+                        .setSmallIcon(R.drawable.notif_icon)
                         .setContentIntent(pendingIntent)
                         .setTicker(getText(R.string.notifTicker))
                         .build();

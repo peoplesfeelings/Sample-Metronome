@@ -33,7 +33,7 @@ public class FragmentMainActivityWelcome extends DialogFragment {
         super.onCreate(savedInstanceState);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        builder.setMessage(R.string.dialogInstruction);
+        builder.setMessage(R.string.directoryInstruction);
 
         builder.setPositiveButton(R.string.btnOk, new DialogInterface.OnClickListener() {
             @Override
