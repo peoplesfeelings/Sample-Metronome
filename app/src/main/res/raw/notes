@@ -1,8 +1,4 @@
 for release
-    version data
-        mani
-        gradl
-        string
     github
 
 replicate
