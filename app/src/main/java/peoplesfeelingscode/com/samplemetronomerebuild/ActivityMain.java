@@ -92,10 +92,10 @@ public class ActivityMain extends ActivityBase {
 
         welcomeDialog = new FragmentMainActivityWelcome();
 
+        checkIfFirstRun();
+
         setUpServiceConnection();
         doBindService();
-
-        checkIfFirstRun();
 
         getPermissionForWrite();
 
@@ -157,8 +157,6 @@ public class ActivityMain extends ActivityBase {
         Context context = getApplicationContext();
         if (!Dry.serviceRunning(context, MyService.class)) {
             startService(new Intent(context, MyService.class));
-
-            Log.d("*************", "activity - inside service not running block");
         }
 
         if (!bound) {
@@ -227,11 +225,6 @@ public class ActivityMain extends ActivityBase {
         btnStartStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-
-
-
                 if (!service.loopRunning) {
                     if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
                         Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
@@ -245,10 +238,6 @@ public class ActivityMain extends ActivityBase {
                     btnStartStop.setText(getResources().getString(R.string.btnStart));
                     service.stop();
                 }
-
-
-
-
             }
         });
     }
@@ -334,7 +323,7 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
                 txtBpm.setText(Double.toString(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()))));
-                service.setPeriod(hgDialV2.getFullTextureAngle());
+                service.setPeriod(preventNegative(hgDialV2.getFullTextureAngle()));
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -344,7 +333,7 @@ public class ActivityMain extends ActivityBase {
                 double bpm = Storage.ftaToBpm(fta);
 
                 txtBpm.setText(Double.toString(bpm));
-                service.setPeriod(hgDialV2.getFullTextureAngle());
+                service.setPeriod(fta);
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
             }
@@ -396,6 +385,7 @@ public class ActivityMain extends ActivityBase {
             Storage.makeDirectoryIfNeeded();
             Storage.writeSamplePack(this);
             Storage.writeNoMediaFile(this);
+
         }
     }
 }
