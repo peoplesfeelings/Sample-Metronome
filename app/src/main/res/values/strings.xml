@@ -31,5 +31,5 @@
     <string name="txtFileTypes">Compatible file types: 3GP, MP4, M4A, AAC, FLAC, MP3, MKV, WAV, OGG</string>
     <string name="txtRateLabel">Rate:</string>
     <string name="txtRepo">View the source code or contribute at:\n\nhttps://bitbucket.org/Peoples_Feelings_Code/precise-sample-metronome</string>
-    <string name="txtPreLicense">Sample Metronome version 1.1\nCopyright (c) 2017 People\'s Feelings\nLicensed under the GNU General Public License version 2\npeoplesfeelingscode@gmail.com</string>
+    <string name="txtPreLicense">Sample Metronome version 1.2\nCopyright (c) 2017 People\'s Feelings\nLicensed under the GNU General Public License version 2\npeoplesfeelingscode@gmail.com</string>
 </resources>
