@@ -1,8 +1,9 @@
-maybe try
-    moving the lastTick assignment below sounds.play before the while loop in loop() to see if it fixes the wonky beginning
-
 to do
     android:description attribute to the <service> element in your app manifest
+    change app name
+    fix timing
+    fix wonky beginning
+        maybe try moving the lastTick assignment below sounds.play before the while loop in loop()
 
 check
     does lastTick need to be initialized in oncreate?
@@ -12,6 +13,9 @@ test
     induce lost serviceconncection and see
         if start/stop listener fails gracefully
         if service keeps running after activity is destroyed (when not playing)
+
+maybe do
+    move fileNeedsToBeLoaded to Dry
 
 for release
 

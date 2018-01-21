@@ -1,6 +1,6 @@
 /*
 
-Precise Sample Metronome
+Sample Metronome
 Copyright (C) 2017 People's Feelings
 
 This program is free software; you can redistribute it and/or
@@ -98,6 +98,7 @@ public class ActivityMain extends ActivityBase {
         doBindService();
 
         getPermissionForWrite();
+        checkForOldFolder();
 
         Log.d("******************", "activity oncreate");
     }
@@ -150,6 +151,17 @@ public class ActivityMain extends ActivityBase {
                 }
                 return;
             }
+        }
+    }
+
+    void checkForOldFolder() {
+        if (Storage.oldPath.exists()) {
+            Storage.makeDirectoryIfNeeded();
+            Storage.copyOldToNew();
+            Storage.writeNoMediaFile(this);
+            Storage.deleteRecursive(Storage.oldPath);
+        } else {
+
         }
     }
 

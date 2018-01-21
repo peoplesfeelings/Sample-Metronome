@@ -1,6 +1,6 @@
 /*
 
-Precise Sample Metronome
+Sample Metronome
 Copyright (C) 2017 People's Feelings
 
 This program is free software; you can redistribute it and/or
@@ -30,7 +30,9 @@ import android.util.Pair;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +64,8 @@ public class Storage {
     static final double DEFAULT_BPM = 120.0;
     static final int DEFAULT_RATE = 1;
 
-    static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/");
+    static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/");
+    static File oldPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/");
 
     static boolean fileNeedsToBeLoaded;
 
@@ -77,6 +80,40 @@ public class Storage {
     };
 
     //////////////// write stuff /////////////////
+
+    static void copyOldToNew() {
+        ArrayList<ObjectFile> files = getFileList(oldPath);
+        int aSize = files.size();
+        InputStream inp;
+        ByteArrayOutputStream outputStream;
+        FileOutputStream fos;
+        for (int i = 0; i < aSize; i++) {
+            try {
+                inp = new FileInputStream(new File(oldPath, files.get(i).name));
+                outputStream = new ByteArrayOutputStream();
+                int size = 0;
+                byte[] buffer = new byte[1024];
+                while((size=inp.read(buffer,0,1024))>=0){
+                    outputStream.write(buffer,0,size);
+                }
+                inp.close();
+                buffer=outputStream.toByteArray();
+                fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", files.get(i).name));
+                fos.write(buffer);
+                fos.close();
+            } catch (IOException e) {
+                Log.d("**********", "error moving files[" + i + "]");
+            }
+        }
+    }
+
+    static void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
+    }
 
     static void makeDirectoryIfNeeded() {
         try {
@@ -95,7 +132,7 @@ public class Storage {
 
     static void writeNoMediaFile(Activity activity) {
         try {
-            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/", ".nomedia"));
+            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", ".nomedia"));
             fos.write(null);
             fos.close();
         } catch (Exception e) {
@@ -107,7 +144,7 @@ public class Storage {
 
         for (int i = 0; i < samplePack.length; i++) {
             InputStream ins = activity.getResources().openRawResource((int) samplePack[i].first);
-            ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             int size = 0;
 
             byte[] buffer = new byte[1024];
@@ -121,7 +158,7 @@ public class Storage {
             }
             buffer=outputStream.toByteArray();
             try {
-                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/", (String) samplePack[i].second));
+                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", (String) samplePack[i].second));
                 fos.write(buffer);
                 fos.close();
             } catch (Exception e) {
@@ -132,7 +169,7 @@ public class Storage {
 
     //////////////// read stuff /////////////////
 
-    static ArrayList<ObjectFile> getFileList() {
+    static ArrayList<ObjectFile> getFileList(File path) {
         makeDirectoryIfNeeded();
         File[] fileArray = path.listFiles();
         ArrayList<ObjectFile> fileList = new ArrayList<ObjectFile>();

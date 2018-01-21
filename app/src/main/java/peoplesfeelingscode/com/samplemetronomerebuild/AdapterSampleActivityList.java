@@ -1,6 +1,6 @@
 /*
 
-Precise Sample Metronome
+Sample Metronome
 Copyright (C) 2017 People's Feelings
 
 This program is free software; you can redistribute it and/or
@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

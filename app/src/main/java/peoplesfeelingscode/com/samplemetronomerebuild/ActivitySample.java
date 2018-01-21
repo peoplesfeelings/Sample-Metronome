@@ -1,6 +1,6 @@
 /*
 
-Precise Sample Metronome
+Sample Metronome
 Copyright (C) 2017 People's Feelings
 
 This program is free software; you can redistribute it and/or
@@ -44,7 +44,7 @@ public class ActivitySample extends ActivityBase {
         listView = (ListView) findViewById(R.id.listView);
         emptyListDialog = new FragmentSampleActivityEmptyList();
 
-        files = Storage.getFileList();
+        files = Storage.getFileList(Storage.path);
 
         setUpListView();
 
@@ -55,7 +55,7 @@ public class ActivitySample extends ActivityBase {
     protected void onRestart() {
         super.onRestart();
 
-        files = Storage.getFileList();
+        files = Storage.getFileList(Storage.path);
 
         setUpListView();
 
