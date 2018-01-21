@@ -154,7 +154,7 @@ public class MyService extends Service {
     }
 
     void setInterval(double fta) {
-        if (lastTick != 0L) {
+        if (lastTick == 0L) {
             lastTick = System.currentTimeMillis();
         }
 
