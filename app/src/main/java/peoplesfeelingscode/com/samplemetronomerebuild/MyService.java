@@ -27,12 +27,11 @@ public class MyService extends Service {
 
     double rate;
     boolean loopRunning;
-    long timeReference;
-    long lastCycle;
-    int cycle = 0;
-    long period;
+    long startTime;
+    long lastTick;
+    int count = 0;
+    long interval;
 
-    String fileLocation;
     int soundId;
     SoundPool sounds;
 
@@ -44,7 +43,7 @@ public class MyService extends Service {
         loopRunning = false;
         context = getApplicationContext();
 
-        lastCycle = System.currentTimeMillis();
+        lastTick = System.currentTimeMillis();
 
         createSoundPool();
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
@@ -131,16 +130,16 @@ public class MyService extends Service {
                 if (Storage.fileNeedsToBeLoaded) {
                     loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
                 }
-                lastCycle = System.currentTimeMillis();
+                lastTick = System.currentTimeMillis();
                 sounds.play(soundId, 1, 1, 1, 0, 1f);
 
                 while (loopRunning) {
                     if (Storage.fileNeedsToBeLoaded) {
                         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
                     }
-                    if (System.currentTimeMillis() > lastCycle + period) {
-                        cycle++;
-                        lastCycle = timeReference + cycle * period;
+                    if (System.currentTimeMillis() > lastTick + interval) {
+                        count++;
+                        lastTick = startTime + count * interval;
 
                         sounds.play(soundId, 1, 1, 1, 0, 1f);
                     }
@@ -150,30 +149,28 @@ public class MyService extends Service {
     }
 
     void loadFile(String fileName) {
-        fileLocation = Storage.path + File.separator + fileName;
-        soundId = sounds.load(fileLocation, 1);
+        soundId = sounds.load(Storage.path + File.separator + fileName, 1);
         Storage.fileNeedsToBeLoaded = false;
     }
 
-    void setPeriod(double fta) {
-        /*
-        loopRunning bool is assigned true after setPeriod() is called in btnStartStop handler so the following
-        should only be true if bpm is being changed while loop is running. this allows smooth change of tempo
-        while metronome is playing
-        */
-        if (lastCycle != 0L && loopRunning) {
-            timeReference = lastCycle;
-        } else {
-            timeReference = System.currentTimeMillis();
-            lastCycle = timeReference;
+    void setInterval(double fta) {
+        if (lastTick != 0L) {
+            lastTick = System.currentTimeMillis();
         }
-        cycle = 0;
+
+        if (loopRunning) {
+            startTime = lastTick;
+        } else {
+            startTime = System.currentTimeMillis();
+            lastTick = startTime;
+        }
+        count = 0;
 
         double bpm = Storage.ftaToBpm(fta);
-        double beat = 60000 / bpm;
+        double beat = Dry.MILLIS_IN_MINUTE / bpm;
         int intervalMillis = (int) (beat / rate);
 
-        period = intervalMillis;
+        interval = intervalMillis;
     }
 
     class MyBinder extends Binder {

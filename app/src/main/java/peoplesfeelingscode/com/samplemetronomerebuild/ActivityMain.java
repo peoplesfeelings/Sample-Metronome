@@ -231,7 +231,7 @@ public class ActivityMain extends ActivityBase {
                         toast.show();
                         return;
                     }
-                    service.setPeriod(hgDialV2.getFullTextureAngle());
+                    service.setInterval(hgDialV2.getFullTextureAngle());
                     service.start();
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
                 } else {
@@ -263,7 +263,7 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
                 service.rate = rateSpinnerPosToFloat(pos);
-                service.setPeriod(hgDialV2.getFullTextureAngle());
+                service.setInterval(hgDialV2.getFullTextureAngle());
                 Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
             }
 
@@ -305,7 +305,7 @@ public class ActivityMain extends ActivityBase {
                     double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
                     hgDialV2.doRapidDial(fta);
                     hgDialV2.doManualGestureDial(fta);
-                    service.setPeriod(hgDialV2.getFullTextureAngle());
+                    service.setInterval(hgDialV2.getFullTextureAngle());
                     Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                 }
             }
@@ -323,7 +323,7 @@ public class ActivityMain extends ActivityBase {
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
                 txtBpm.setText(Double.toString(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()))));
-                service.setPeriod(preventNegative(hgDialV2.getFullTextureAngle()));
+                service.setInterval(preventNegative(hgDialV2.getFullTextureAngle()));
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -333,7 +333,7 @@ public class ActivityMain extends ActivityBase {
                 double bpm = Storage.ftaToBpm(fta);
 
                 txtBpm.setText(Double.toString(bpm));
-                service.setPeriod(fta);
+                service.setInterval(fta);
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
             }
