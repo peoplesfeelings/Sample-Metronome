@@ -12,6 +12,7 @@ check
     does lastTick need to be initialized in oncreate?
         check against default 0L in setinterval seems like a check for not initialized
     if there are no files, does loadFile and start() fail gracefully
+        soundpool.load returns 0 if it fails
 
 test
     induce lost serviceconncection and see
@@ -25,7 +26,12 @@ for release
 
 replicate
 
-documentation
+audiotrack notes
+    how will various sample rates work with SAMPLE_RATE_UNSPECIFIED set
+    does format need to be specified
+    note buffer size limit for user?
+
+documentation [out of date]
     main activity
         when main activity is created, it
             checks if app has run before and, if not,
