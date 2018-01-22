@@ -35,7 +35,7 @@ public class MyService extends Service {
     long startTime;
     long lastTick;
     int count = 0;
-    long interval;
+    double interval;
 
     int soundId;
     SoundPool sounds;
@@ -91,10 +91,10 @@ public class MyService extends Service {
                     count = 0;
                 } else {
                     count++;
-                    lastTick = startTime + count * interval;
+                    lastTick = startTime + (long) (count * interval);
                 }
 
-                handler.postAtTime(this, lastTick + interval);
+                handler.postAtTime(this, (long) (lastTick + interval));
             }
         });
 
@@ -169,7 +169,7 @@ public class MyService extends Service {
 
         double bpm = Storage.ftaToBpm(fta);
         double beatDuration = Dry.MILLIS_IN_MINUTE / bpm;
-        interval = (int) (beatDuration / rate);
+        interval = (beatDuration / rate);
     }
 
     class MyBinder extends Binder {
