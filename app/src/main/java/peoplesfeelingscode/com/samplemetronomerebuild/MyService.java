@@ -11,7 +11,10 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
@@ -25,8 +28,10 @@ public class MyService extends Service {
     Notification notification;
     Context context;
 
+    HandlerThread handlerThread;
+
     double rate;
-    boolean loopRunning;
+    boolean playing;
     long startTime;
     long lastTick;
     int count = 0;
@@ -40,10 +45,10 @@ public class MyService extends Service {
         super.onCreate();
 
         mBinder = new MyBinder();
-        loopRunning = false;
+        playing = false;
         context = getApplicationContext();
 
-        lastTick = System.currentTimeMillis();
+        handlerThread = new HandlerThread("MyHandlerThread");
 
         createSoundPool();
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
@@ -68,16 +73,42 @@ public class MyService extends Service {
     }
 
     void start() {
+        handlerThread.start();
+        final Handler handler = new Handler(handlerThread.getLooper());
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (Storage.fileNeedsToBeLoaded) {
+                    loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
+                }
+
+                sounds.play(soundId, 1, 1, 1, 0, 1f);
+
+                if (startTime == -1) {
+                    startTime = SystemClock.uptimeMillis();
+                    lastTick = startTime;
+                    count = 0;
+                } else {
+                    count++;
+                    lastTick = startTime + count * interval;
+                }
+
+                handler.postAtTime(this, lastTick + interval);
+            }
+        });
+
         startForeground(ONGOING_NOTIFICATION_ID, notification);
-        loopRunning = true;
-        loop();
+        playing = true;
 
         Log.d("*************", "service - start");
     }
 
     void stop() {
+        handlerThread.quit();
+        handlerThread = new HandlerThread("MyHandlerThread");
         stopForeground(true);
-        loopRunning = false;
+        playing = false;
 
         Log.d("*************", "service - stop");
     }
@@ -123,54 +154,22 @@ public class MyService extends Service {
         sounds = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC,0);
     }
 
-    void loop() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (Storage.fileNeedsToBeLoaded) {
-                    loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
-                }
-                lastTick = System.currentTimeMillis();
-                sounds.play(soundId, 1, 1, 1, 0, 1f);
-
-                while (loopRunning) {
-                    if (Storage.fileNeedsToBeLoaded) {
-                        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
-                    }
-                    if (System.currentTimeMillis() > lastTick + interval) {
-                        count++;
-                        lastTick = startTime + count * interval;
-
-                        sounds.play(soundId, 1, 1, 1, 0, 1f);
-                    }
-                }
-            }
-        }).start();
-    }
-
     void loadFile(String fileName) {
         soundId = sounds.load(Storage.path + File.separator + fileName, 1);
         Storage.fileNeedsToBeLoaded = false;
     }
 
     void setInterval(double fta) {
-        if (lastTick == 0L) {
-            lastTick = System.currentTimeMillis();
-        }
-
-        if (loopRunning) {
+        if (playing) {
             startTime = lastTick;
+            count = 0;
         } else {
-            startTime = System.currentTimeMillis();
-            lastTick = startTime;
+            startTime = -1;
         }
-        count = 0;
 
         double bpm = Storage.ftaToBpm(fta);
-        double beat = Dry.MILLIS_IN_MINUTE / bpm;
-        int intervalMillis = (int) (beat / rate);
-
-        interval = intervalMillis;
+        double beatDuration = Dry.MILLIS_IN_MINUTE / bpm;
+        interval = (int) (beatDuration / rate);
     }
 
     class MyBinder extends Binder {

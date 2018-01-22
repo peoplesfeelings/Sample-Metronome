@@ -121,7 +121,7 @@ public class ActivityMain extends ActivityBase {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (bound && !service.loopRunning) {
+        if (bound && !service.playing) {
             stopService(new Intent(this, MyService.class));
         }
 
@@ -192,7 +192,7 @@ public class ActivityMain extends ActivityBase {
                 MyService.MyBinder binder = (MyService.MyBinder) iBinder;
                 service = binder.getService();
 
-                if (service.loopRunning) {
+                if (service.playing) {
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
                 }
 
@@ -237,7 +237,7 @@ public class ActivityMain extends ActivityBase {
         btnStartStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!service.loopRunning) {
+                if (!service.playing) {
                     if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
                         Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
                         toast.show();
