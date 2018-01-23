@@ -7,7 +7,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioAttributes;
+import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.media.SoundPool;
 import android.os.Binder;
 import android.os.Build;
@@ -18,10 +20,13 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
+import java.io.InputStream;
 
 public class MyService extends Service {
     final int ONGOING_NOTIFICATION_ID = 4345;
     final int MAX_STREAMS = 16;
+
+    AudioTrack at;
 
     IBinder mBinder;
 
@@ -55,6 +60,8 @@ public class MyService extends Service {
 
         setUpForeground();
 
+        setUpTestAudioTrack();
+
         Log.d("**************", "service oncreate");
     }
 
@@ -72,6 +79,22 @@ public class MyService extends Service {
         Log.d("**************", "service ondestroy");
     }
 
+    void setUpTestAudioTrack() {
+        InputStream ins = getResources().openRawResource((int) R.raw.test);
+        byte[] bytes;
+        WavInfo info;
+        try {
+            info = Storage.readHeader(ins);
+            bytes = Storage.readWavPcm(info, ins);
+        } catch (Exception e) {
+            Log.d("*************", "except");
+            return;
+        }
+        at = new AudioTrack(AudioManager.STREAM_NOTIFICATION, info.rate, info.channels, AudioFormat.ENCODING_PCM_16BIT, bytes.length, AudioTrack.MODE_STATIC);
+        at.write(bytes,0,bytes.length);
+        at.setPlaybackRate(info.rate);
+    }
+
     void start() {
         handlerThread.start();
         final Handler handler = new Handler(handlerThread.getLooper());
@@ -83,7 +106,11 @@ public class MyService extends Service {
                     loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
                 }
 
-                sounds.play(soundId, 1, 1, 1, 0, 1f);
+//                sounds.play(soundId, 1, 1, 1, 0, 1f);
+                if (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+                    at.stop();
+                }
+                at.play();
 
                 if (startTime == -1) {
                     startTime = SystemClock.uptimeMillis();
