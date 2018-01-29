@@ -1,25 +1,20 @@
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.media.SoundPool;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
 
-import java.io.File;
 import java.io.InputStream;
 
 public class MyService extends Service {
@@ -42,9 +37,6 @@ public class MyService extends Service {
     int count = 0;
     double interval;
 
-    int soundId;
-    SoundPool sounds;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -55,7 +47,6 @@ public class MyService extends Service {
 
         handlerThread = new HandlerThread("MyHandlerThread");
 
-        createSoundPool();
         loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
 
         setUpForeground();
@@ -106,7 +97,6 @@ public class MyService extends Service {
                     loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
                 }
 
-//                sounds.play(soundId, 1, 1, 1, 0, 1f);
                 if (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
                     at.stop();
                 }
@@ -156,33 +146,8 @@ public class MyService extends Service {
                         .build();
     }
 
-    void createSoundPool() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            createNewSoundPool();
-        } else {
-            createOldSoundPool();
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    void createNewSoundPool(){
-        AudioAttributes attributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build();
-        sounds = new SoundPool.Builder()
-                .setAudioAttributes(attributes)
-                .setMaxStreams(MAX_STREAMS)
-                .build();
-    }
-
-    @SuppressWarnings("deprecation")
-    void createOldSoundPool(){
-        sounds = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC,0);
-    }
-
     void loadFile(String fileName) {
-        soundId = sounds.load(Storage.path + File.separator + fileName, 1);
+        // Storage.path + File.separator + fileName;
         Storage.fileNeedsToBeLoaded = false;
     }
 

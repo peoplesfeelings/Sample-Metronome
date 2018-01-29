@@ -1,4 +1,10 @@
 to do
+    redo filetype filter
+    route audio files to corresponding decoder
+    implement jlayer for mp3
+        http://www.badlogicgames.com/forum/viewtopic.php?f=11&t=17829
+    implement flac library
+    allow for decoding time when changing sample file while playing
     android:description attribute to the <service> element in your app manifest
     fix timing
     fix wonky beginning
@@ -26,10 +32,17 @@ for release
 
 replicate
 
-audiotrack notes
+audiotrack
+    https://developer.android.com/reference/android/media/MediaCodecInfo.html
+    https://0110.be/posts/Decode_MP3s_and_other_Audio_formats_the_easy_way_on_Android
+    implement check for length, since not streaming pcm into audiotrack
     how will various sample rates work with SAMPLE_RATE_UNSPECIFIED set
     does format need to be specified
     note buffer size limit for user?
+    ndk and c/c++ libraries to get pcm data like libmad?
+    openjdk include like this dude says? https://stackoverflow.com/questions/16803343/javax-cannot-be-imported-in-my-android-app
+    call release in onstop?
+
 
 documentation [out of date]
     main activity
@@ -118,3 +131,4 @@ documentation [out of date]
             fileNeedsToBeLoaded
                 only set true in checkbox onclicklistener
                 only set false in loadFile()
+
