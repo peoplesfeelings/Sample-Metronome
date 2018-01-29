@@ -18,6 +18,8 @@ import android.util.Log;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class MyService extends Service {
@@ -35,6 +37,9 @@ public class MyService extends Service {
     FilenameUtils filenameUtils;
     String fileLocation;
     String ext;
+    byte[] bytes;
+    WavInfo info;
+    InputStream ins;
 
     double rate;
     boolean playing;
@@ -57,8 +62,6 @@ public class MyService extends Service {
 
         setUpForeground();
 
-        setUpTestAudioTrack();
-
         Log.d("**************", "service oncreate");
     }
 
@@ -76,10 +79,7 @@ public class MyService extends Service {
         Log.d("**************", "service ondestroy");
     }
 
-    void setUpTestAudioTrack() {
-        InputStream ins = getResources().openRawResource((int) R.raw.test);
-        byte[] bytes;
-        WavInfo info;
+    void loadWav() {
         try {
             info = Storage.readHeader(ins);
             bytes = Storage.readWavPcm(info, ins);
@@ -87,7 +87,7 @@ public class MyService extends Service {
             Log.d("*************", "except");
             return;
         }
-        at = new AudioTrack(AudioManager.STREAM_NOTIFICATION, info.rate, info.channels, AudioFormat.ENCODING_PCM_16BIT, bytes.length, AudioTrack.MODE_STATIC);
+        at = new AudioTrack(AudioManager.STREAM_MUSIC, info.rate, info.channels, AudioFormat.ENCODING_PCM_16BIT, bytes.length, AudioTrack.MODE_STATIC);
         at.write(bytes,0,bytes.length);
         at.setPlaybackRate(info.rate);
     }
@@ -153,14 +153,18 @@ public class MyService extends Service {
     }
 
     void loadFile(String fileName) {
-        fileLocation = Storage.path + File.separator + fileName;
+        try {
+            ins = new FileInputStream(new File(Storage.path, fileName));
+        } catch (FileNotFoundException e) {
+            //
+        }
         ext = filenameUtils.getExtension(fileName);
         switch (ext.toLowerCase()) {
             case("flac"):
 
                 break;
             case("wav"):
-
+                loadWav();
                 break;
             case("mp3"):
 

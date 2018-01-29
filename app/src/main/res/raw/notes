@@ -1,22 +1,19 @@
 to do
+    wav
+        implement check on rate
+        implement check on bitrate
+        implement check on channels
+        implement check on length
     redo filetype filter
-    route audio files to corresponding decoder
     implement jlayer for mp3
         http://www.badlogicgames.com/forum/viewtopic.php?f=11&t=17829
     implement flac library
     allow for decoding time when changing sample file while playing
     android:description attribute to the <service> element in your app manifest
-    fix timing
     fix wonky beginning
         maybe try moving the lastTick assignment below sounds.play before the while loop in loop()
 
-optimize timing
-    dont cast value of service.interval to int
-        keep value as double until after multiplied by count
-
 check
-    does lastTick need to be initialized in oncreate?
-        check against default 0L in setinterval seems like a check for not initialized
     if there are no files, does loadFile and start() fail gracefully
         soundpool.load returns 0 if it fails
 
@@ -32,10 +29,6 @@ about
 
 maybe do
     move fileNeedsToBeLoaded to Dry
-
-for release
-
-replicate
 
 audiotrack
     https://developer.android.com/reference/android/media/MediaCodecInfo.html
