@@ -24,7 +24,6 @@ package peoplesfeelingscode.com.samplemetronomerebuild;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.AudioFormat;
 import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
@@ -182,7 +181,7 @@ public class Storage {
 
     //////////////// read stuff /////////////////
 
-    public static WavInfo readHeader(InputStream wavStream)
+    public static AudioFileInfo readHeader(InputStream wavStream)
             throws IOException, DecoderException {
 
         ByteBuffer buffer = ByteBuffer.allocate(HEADER_SIZE);
@@ -193,15 +192,10 @@ public class Storage {
         buffer.rewind();
         buffer.position(buffer.position() + 20);
         int format = buffer.getShort();
-        checkFormat(format == 1, "Unsupported encoding: " + format); // 1 means Linear PCM
         int channels = buffer.getShort();
-        checkFormat(channels == 1 || channels == 2, "Unsupported channels: " + channels);
-        channels = (channels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO);
         int rate = buffer.getInt();
-        checkFormat(rate <= 48000 && rate >= 11025, "Unsupported rate: " + rate);
         buffer.position(buffer.position() + 6);
-        int bits = buffer.getShort();
-        checkFormat(bits == 16, "Unsupported bits: " + bits);
+        int depth = buffer.getShort();
         int dataSize = 0;
         while (buffer.getInt() != 0x61746164) { // "data" marker
             Log.d(TAG, "Skipping non-data chunk");
@@ -213,23 +207,11 @@ public class Storage {
             buffer.rewind();
         }
         dataSize = buffer.getInt();
-        checkFormat(dataSize > 0, "wrong datasize: " + dataSize);
 
-        return new WavInfo(rate, channels, dataSize);
+        return new AudioFileInfo(format, channels, rate, depth, dataSize);
     }
 
-    //copied from web
-    static boolean checkFormat(boolean test, String errorMsg) {
-        if (test) {
-            return true;
-        } else {
-            return false;
-            // do something with errorMsg
-            // set flag that error happened
-        }
-    }
-
-    public static byte[] readWavPcm(WavInfo info, InputStream stream) throws IOException {
+    public static byte[] readWavPcm(AudioFileInfo info, InputStream stream) throws IOException {
         byte[] data = new byte[info.dataSize];
         stream.read(data, 0, data.length);
         return data;

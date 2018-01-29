@@ -8,7 +8,7 @@ to do
     implement jlayer for mp3
         http://www.badlogicgames.com/forum/viewtopic.php?f=11&t=17829
     implement flac library
-    allow for decoding time when changing sample file while playing
+    alert dialog for if audio file doesn't meet criteria
     android:description attribute to the <service> element in your app manifest
     fix wonky beginning
         maybe try moving the lastTick assignment below sounds.play before the while loop in loop()
@@ -16,6 +16,8 @@ to do
 check
     if there are no files, does loadFile and start() fail gracefully
         soundpool.load returns 0 if it fails
+    handler.postattime works if time is missed
+    difference between
 
 test
     induce lost serviceconncection and see
@@ -26,11 +28,13 @@ about
     apache commons io
     jlayer
     justflac
+    update accepted files
 
 maybe do
     move fileNeedsToBeLoaded to Dry
 
 audiotrack
+    the wav parsing code assumes little endian...
     https://developer.android.com/reference/android/media/MediaCodecInfo.html
     https://0110.be/posts/Decode_MP3s_and_other_Audio_formats_the_easy_way_on_Android
     implement check for length, since not streaming pcm into audiotrack

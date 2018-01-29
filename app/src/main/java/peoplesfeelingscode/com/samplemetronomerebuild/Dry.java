@@ -16,4 +16,23 @@ public class Dry {
         }
         return false;
     }
+
+    static boolean arrayContains(int[] arr, int val) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == val) return true;
+        }
+
+        return false;
+    }
+
+    static String concatCSV (int[] values) {
+        String str = "";
+
+        for (int i = 0; i < values.length; i++) {
+            str += values[i];
+            str += i == values.length - 1 ? ", " : "";
+        }
+
+        return str;
+    }
 }
