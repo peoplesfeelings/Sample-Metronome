@@ -43,7 +43,6 @@ public class MyService extends Service {
 
     HandlerThread handlerThread;
 
-    FilenameUtils filenameUtils;
     String fileLocation;
     String ext;
     byte[] bytes;
@@ -154,10 +153,10 @@ public class MyService extends Service {
         try {
             ins = new FileInputStream(new File(Storage.path, fileName));
         } catch (FileNotFoundException e) {
-            //
+            handleFileProblem("File not found. " + e.getMessage());
             return;
         }
-        ext = filenameUtils.getExtension(fileName);
+        ext = FilenameUtils.getExtension(fileName);
         switch (ext.toLowerCase()) {
             case("flac"):
 
@@ -178,7 +177,7 @@ public class MyService extends Service {
             info = Storage.readHeader(ins);
             bytes = Storage.readWavPcm(info, ins);
         } catch (Exception e) {
-            handleIncompatibleFile("Error reading file. " + e.getMessage());
+            handleFileProblem("Error reading file. " + e.getMessage());
 
             Log.d("*************", "except");
             return;
@@ -199,30 +198,30 @@ public class MyService extends Service {
 
     boolean fileSupported(AudioFileInfo info) {
         if (info.format != 1) {
-            handleIncompatibleFile(constructFormatMessage(FORMAT, -1));
+            handleFileProblem(constructFormatMessage(FORMAT, -1));
             return false;
         }
         if (!Dry.arrayContains(SUPPORTED_CHANNELS, info.channels)) {
-            handleIncompatibleFile(constructFormatMessage(CHANNELS, info.channels));
+            handleFileProblem(constructFormatMessage(CHANNELS, info.channels));
             return false;
         }
         if (!Dry.arrayContains(SUPPORTED_SAMPLE_RATES, info.rate)) {
-            handleIncompatibleFile(constructFormatMessage(RATE, info.rate));
+            handleFileProblem(constructFormatMessage(RATE, info.rate));
             return false;
         }
         if (!Dry.arrayContains(SUPPORTED_BIT_DEPTHS, info.depth)) {
-            handleIncompatibleFile(constructFormatMessage(DEPTH, info.depth));
+            handleFileProblem(constructFormatMessage(DEPTH, info.depth));
             return false;
         }
         if (info.dataSize <= 0) {
-            handleIncompatibleFile(constructFormatMessage(DATASIZE, info.dataSize));
+            handleFileProblem(constructFormatMessage(DATASIZE, info.dataSize));
             return false;
         }
 
         return true;
     }
 
-    void handleIncompatibleFile(String message) {
+    void handleFileProblem(String message) {
         stop();
     }
 

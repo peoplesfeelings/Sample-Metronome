@@ -1,9 +1,4 @@
 to do
-    wav
-        implement check on rate
-        implement check on bitrate
-        implement check on channels
-        implement check on length
     redo filetype filter
     implement jlayer for mp3
         http://www.badlogicgames.com/forum/viewtopic.php?f=11&t=17829
@@ -25,6 +20,7 @@ test
         if service keeps running after activity is destroyed (when not playing)
 
 about
+    precision blurb
     apache commons io
     jlayer
     justflac
