@@ -25,6 +25,11 @@ test
         if start/stop listener fails gracefully
         if service keeps running after activity is destroyed (when not playing)
 
+about
+    apache commons io
+    jlayer
+    justflac
+
 maybe do
     move fileNeedsToBeLoaded to Dry
 

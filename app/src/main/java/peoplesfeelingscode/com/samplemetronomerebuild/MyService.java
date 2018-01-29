@@ -15,11 +15,13 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
 
+import org.apache.commons.io.FilenameUtils;
+
+import java.io.File;
 import java.io.InputStream;
 
 public class MyService extends Service {
     final int ONGOING_NOTIFICATION_ID = 4345;
-    final int MAX_STREAMS = 16;
 
     AudioTrack at;
 
@@ -29,6 +31,10 @@ public class MyService extends Service {
     Context context;
 
     HandlerThread handlerThread;
+
+    FilenameUtils filenameUtils;
+    String fileLocation;
+    String ext;
 
     double rate;
     boolean playing;
@@ -147,7 +153,20 @@ public class MyService extends Service {
     }
 
     void loadFile(String fileName) {
-        // Storage.path + File.separator + fileName;
+        fileLocation = Storage.path + File.separator + fileName;
+        ext = filenameUtils.getExtension(fileName);
+        switch (ext.toLowerCase()) {
+            case("flac"):
+
+                break;
+            case("wav"):
+
+                break;
+            case("mp3"):
+
+                break;
+        }
+        Log.d("*************", "ext: " + ext);
         Storage.fileNeedsToBeLoaded = false;
     }
 
