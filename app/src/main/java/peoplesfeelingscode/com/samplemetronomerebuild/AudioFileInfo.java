@@ -15,4 +15,12 @@ public class AudioFileInfo {
         this.depth = depth;
         this.dataSize = dataSize;
     }
+
+    public AudioFileInfo(int format, int channels, int rate, int depth) {
+        this.format = format;
+        this.channels = channels;
+        this.rate = rate;
+        this.depth = depth;
+        dataSize = -1;
+    }
 }

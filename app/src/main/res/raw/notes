@@ -1,4 +1,8 @@
 to do
+    mp3
+        check for mpeg versions?
+        check for joint stereo?
+        is using 16 bit depth across the board safe
     redo filetype filter
     implement jlayer for mp3
         http://www.badlogicgames.com/forum/viewtopic.php?f=11&t=17829
@@ -30,6 +34,7 @@ maybe do
     move fileNeedsToBeLoaded to Dry
 
 audiotrack
+    https://www.pocketmagic.net/android-audio-player-using-mediacodec-mediaextractor/
     the wav parsing code assumes little endian...
     https://developer.android.com/reference/android/media/MediaCodecInfo.html
     https://0110.be/posts/Decode_MP3s_and_other_Audio_formats_the_easy_way_on_Android

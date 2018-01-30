@@ -22,6 +22,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import javazoom.jl.decoder.Bitstream;
+import javazoom.jl.decoder.BitstreamException;
+import javazoom.jl.decoder.Decoder;
+import javazoom.jl.decoder.Header;
+
 import static peoplesfeelingscode.com.samplemetronomerebuild.MyService.attribute.CHANNELS;
 import static peoplesfeelingscode.com.samplemetronomerebuild.MyService.attribute.DATASIZE;
 import static peoplesfeelingscode.com.samplemetronomerebuild.MyService.attribute.DEPTH;
@@ -47,6 +52,10 @@ public class MyService extends Service {
     String ext;
     byte[] bytes;
     AudioFileInfo info;
+
+    Decoder mp3Decoder;
+    Bitstream bitstream;
+    Header mp3Header;
 
     double rate;
     boolean playing;
@@ -165,11 +174,69 @@ public class MyService extends Service {
                 loadWav(ins);
                 break;
             case("mp3"):
-
+                loadMp3(ins);
                 break;
         }
         Log.d("*************", "ext: " + ext);
         Storage.fileNeedsToBeLoaded = false;
+    }
+
+    void loadMp3(InputStream ins) {
+        mp3Decoder = new Decoder();
+        bitstream = new Bitstream(ins);
+
+        try {
+            mp3Header = bitstream.readFrame();
+            Log.d("***********", "mp3 header to string: " + mp3Header.toString());
+        } catch (BitstreamException e) { }
+
+        if (mp3Header == null) handleFileProblem("Error. Could not read MP3 header.");
+
+        int channels;
+        int mode = mp3Header.mode();
+        switch (mode) {
+            case 2:
+            case 0:
+                channels = 2;
+                break;
+            case 3:
+                channels = 1;
+                break;
+            default:
+                channels = -1; // joint stereo
+        }
+
+        int mpegVersion = mp3Header.version();
+        int sampleSize = mp3Header.sample_frequency();
+        int sampleRate;
+        /*
+            h_version 1 is mpeg version 1, which is the one with decent sample rates
+            according to https://www.datavoyage.com/mpgscript/mpeghdr.htm
+        */
+        if (mpegVersion == 1) {
+            switch (sampleSize) {
+                case 0:
+                    sampleRate = 44100;
+                    break;
+                case 1:
+                    sampleRate = 48000;
+                    break;
+                case 2:
+                    sampleRate = 32000;
+                    break;
+                default:
+                    sampleRate = -1;
+            }
+        } else {
+            sampleRate = -1;
+        }
+
+        info = new AudioFileInfo(
+                1,
+                channels,
+                sampleRate,
+                16
+        );
     }
 
     void loadWav(InputStream ins) {
