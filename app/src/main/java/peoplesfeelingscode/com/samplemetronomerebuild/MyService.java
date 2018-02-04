@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.MediaCodec;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -20,12 +23,10 @@ import org.apache.commons.io.FilenameUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-
-import javazoom.jl.decoder.Bitstream;
-import javazoom.jl.decoder.BitstreamException;
-import javazoom.jl.decoder.Decoder;
-import javazoom.jl.decoder.Header;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static peoplesfeelingscode.com.samplemetronomerebuild.MyService.attribute.CHANNELS;
 import static peoplesfeelingscode.com.samplemetronomerebuild.MyService.attribute.DATASIZE;
@@ -39,6 +40,8 @@ public class MyService extends Service {
     final int[] SUPPORTED_CHANNELS = { 1, 2 };
     final int[] SUPPORTED_SAMPLE_RATES = { 44100, 48000 };
 
+    final long TIMEOUTUS = 3000;
+
     AudioTrack at;
 
     IBinder mBinder;
@@ -48,14 +51,11 @@ public class MyService extends Service {
 
     HandlerThread handlerThread;
 
-    String fileLocation;
     String ext;
     byte[] bytes;
     AudioFileInfo info;
 
-    Decoder mp3Decoder;
-    Bitstream bitstream;
-    Header mp3Header;
+    MediaCodec decoder;
 
     double rate;
     boolean playing;
@@ -174,69 +174,135 @@ public class MyService extends Service {
                 loadWav(ins);
                 break;
             case("mp3"):
-                loadMp3(ins);
+                loadMp3(Storage.path + File.separator + fileName);
                 break;
         }
-        Log.d("*************", "ext: " + ext);
         Storage.fileNeedsToBeLoaded = false;
     }
 
-    void loadMp3(InputStream ins) {
-        mp3Decoder = new Decoder();
-        bitstream = new Bitstream(ins);
+    void loadMp3(String fileLocation) {
+        boolean reconfigure = true;
+
+        short [] decoded = new short[0];
+        int decodedIdx = 0;
+        MediaFormat oformat = null;
+
+        MediaExtractor extractor = new MediaExtractor();
+        MediaFormat format;
+        ByteBuffer[] codecInputBuffers;
+        ByteBuffer[] codecOutputBuffers;
 
         try {
-            mp3Header = bitstream.readFrame();
-            Log.d("***********", "mp3 header to string: " + mp3Header.toString());
-        } catch (BitstreamException e) { }
-
-        if (mp3Header == null) handleFileProblem("Error. Could not read MP3 header.");
-
-        int channels;
-        int mode = mp3Header.mode();
-        switch (mode) {
-            case 2:
-            case 0:
-                channels = 2;
-                break;
-            case 3:
-                channels = 1;
-                break;
-            default:
-                channels = -1; // joint stereo
+            extractor.setDataSource(fileLocation);
+        } catch (IOException e) {
+            handleFileProblem("Error: exception thrown when trying to extract data from file " + fileLocation);
+            return;
         }
 
-        int mpegVersion = mp3Header.version();
-        int sampleSize = mp3Header.sample_frequency();
-        int sampleRate;
-        /*
-            h_version 1 is mpeg version 1, which is the one with decent sample rates
-            according to https://www.datavoyage.com/mpgscript/mpeghdr.htm
-        */
-        if (mpegVersion == 1) {
-            switch (sampleSize) {
-                case 0:
-                    sampleRate = 44100;
-                    break;
-                case 1:
-                    sampleRate = 48000;
-                    break;
-                case 2:
-                    sampleRate = 32000;
-                    break;
-                default:
-                    sampleRate = -1;
-            }
+        if (extractor.getTrackCount() > 1) {
+            handleFileProblem("Multiple tracks in file.");
+            return;
+        }
+
+        format = extractor.getTrackFormat(0);
+        if (format.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
+            extractor.selectTrack(0);
         } else {
-            sampleRate = -1;
+            handleFileProblem("MIME type doesn't match file extension.");
+            return;
         }
 
-        info = new AudioFileInfo(
-                1,
-                channels,
-                sampleRate,
-                16
-        );
+        try {
+            decoder = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_MPEG);
+        } catch (IOException e) {
+            handleFileProblem("Failed to instantiate MP3 MediaCodec.");
+            return;
+        }
+        decoder.configure(format, null, null, 0);
+        decoder.start();
+        codecInputBuffers = decoder.getInputBuffers();
+        codecOutputBuffers = decoder.getOutputBuffers();
+
+        MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+        boolean sawInputEOS = false;
+        boolean sawOutputEOS = false;
+        while (!sawOutputEOS) {
+            if (!sawInputEOS) {
+                int inputBufIndex = decoder.dequeueInputBuffer(TIMEOUTUS);
+                if (inputBufIndex >= 0) {
+                    ByteBuffer dstBuf = codecInputBuffers[inputBufIndex];
+                    int sampleSize = extractor.readSampleData(dstBuf, 0 );
+                    long presentationTimeUs = 0;
+                    if (sampleSize < 0) {
+                        sawInputEOS = true;
+                        sampleSize = 0;
+                    } else {
+                        presentationTimeUs = extractor.getSampleTime();
+                    }
+                    decoder.queueInputBuffer(
+                            inputBufIndex,
+                            0 ,
+                            sampleSize,
+                            presentationTimeUs,
+                            sawInputEOS ? MediaCodec.BUFFER_FLAG_END_OF_STREAM : 0);
+                    if (!sawInputEOS) {
+                        extractor.advance();
+                    }
+                }
+            }
+            int res = decoder.dequeueOutputBuffer(info, TIMEOUTUS);
+            if (res >= 0) {
+                if (info.size > 0 && reconfigure) {
+                    reconfigure = false;
+                    extractor.seekTo(0, MediaExtractor.SEEK_TO_NEXT_SYNC);
+                    sawInputEOS = false;
+                    decoder.stop();
+                    decoder.configure(format, null, null, 0);
+                    decoder.start();
+                    codecInputBuffers = decoder.getInputBuffers();
+                    codecOutputBuffers = decoder.getOutputBuffers();
+                    continue;
+                }
+                int outputBufIndex = res;
+                ByteBuffer buf = codecOutputBuffers[outputBufIndex];
+                if (decodedIdx + (info.size / 2) >= decoded.length) {
+                    decoded = Arrays.copyOf(decoded, decodedIdx + (info.size / 2));
+                }
+                for (int i = 0; i < info.size; i += 2) {
+                    decoded[decodedIdx++] = buf.getShort(i);
+                }
+                decoder.releaseOutputBuffer(outputBufIndex, false);
+                if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                    sawOutputEOS = true;
+                }
+            } else if (res == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                codecOutputBuffers = decoder.getOutputBuffers();
+            } else if (res == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                oformat = decoder.getOutputFormat();
+                Log.d("************", oformat.toString());
+            }
+        }
+
+        extractor.release();
+        decoder.stop();
+        decoder.release();
+
+        byte[] decodedBytes = Dry.MyShortToByte(decoded);
+
+        Log.d("************", "decoded.length: " + decoded.length);
+        Log.d("************", "decodedBytes.length: " + decodedBytes.length);
+
+        at = new AudioTrack(
+                AudioManager.STREAM_MUSIC,
+                oformat.getInteger(MediaFormat.KEY_SAMPLE_RATE),
+                (oformat.getInteger(MediaFormat.KEY_CHANNEL_COUNT) == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
+                AudioFormat.ENCODING_PCM_16BIT,
+                decodedBytes.length,
+                AudioTrack.MODE_STATIC);
+        at.write(decodedBytes,0,decodedBytes.length);
+        at.setPlaybackRate(oformat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
+
+        Log.d("***********", "");
     }
 
     void loadWav(InputStream ins) {

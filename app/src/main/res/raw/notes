@@ -30,10 +30,21 @@ about
     justflac
     update accepted files
 
+store listing
+    precision
+    connect by usb. put in sample_metronome folder
+
 maybe do
     move fileNeedsToBeLoaded to Dry
 
 audiotrack
+    better to decode async?
+    mediaextractor
+        https://gist.github.com/a-m-s/1991ab18fbcb0fcc2cf9
+        https://www.programcreek.com/java-api-examples/index.php?api=android.media.MediaExtractor
+    short array to byte array
+        https://stackoverflow.com/questions/10804852/how-to-convert-short-array-to-byte-array/12347176#12347176
+        https://stackoverflow.com/questions/15124050/audiotrack-short-array-to-byte-array-distortion-using-jlayerjava-mp3-decoder
     https://www.pocketmagic.net/android-audio-player-using-mediacodec-mediaextractor/
     the wav parsing code assumes little endian...
     https://developer.android.com/reference/android/media/MediaCodecInfo.html
@@ -134,4 +145,32 @@ documentation [out of date]
             fileNeedsToBeLoaded
                 only set true in checkbox onclicklistener
                 only set false in loadFile()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+########################## snippets i may never need ##########################
+
+
+
+        if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
+            inputBuffer = ByteBuffer.allocate(format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE));
+        } else {
+            inputBuffer = ByteBuffer.allocate((int) new File(fileLocation).length());
+        }
+        while (extractor.readSampleData(inputBuffer, 0) >= 0) {
+            extractor.advance();
+        }
 
