@@ -46,7 +46,7 @@ public class MyService extends Service {
 
         handlerThread = new HandlerThread("MyHandlerThread");
 
-        loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
+        Storage.fileNeedsToBeLoaded = true;
 
         setUpForeground();
 
