@@ -26,7 +26,6 @@ test
 about
     precision blurb
     apache commons io
-    jlayer
     justflac
     update accepted files
 
@@ -145,9 +144,11 @@ documentation [out of date]
             fileNeedsToBeLoaded
                 only set true in checkbox onclicklistener
                 only set false in loadFile()
-
-
-
+    diagram
+        1
+            https://drive.google.com/file/d/1I9zJuEpkjePmoJ-Cmkuff_toSS0uLj03/view?usp=sharing
+        2
+            https://drive.google.com/file/d/15RkGM2yxLSBOSa7fqDMVjZ_NewCASOQn/view?usp=sharing
 
 
 

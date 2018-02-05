@@ -34,17 +34,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-
-import static android.content.ContentValues.TAG;
-
-/**
- * Created by User Name on 6/18/2017.
- */
 
 public class Storage {
     private static final String RIFF_HEADER = "RIFF";
@@ -52,7 +44,6 @@ public class Storage {
     private static final String FMT_HEADER = "fmt ";
     private static final String DATA_HEADER = "data";
 
-    private static final int HEADER_SIZE = 44;
 
     private static final String CHARSET = "ASCII";
 
@@ -180,42 +171,6 @@ public class Storage {
     }
 
     //////////////// read stuff /////////////////
-
-    public static AudioFileInfo readHeader(InputStream wavStream)
-            throws IOException, DecoderException {
-
-        ByteBuffer buffer = ByteBuffer.allocate(HEADER_SIZE);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-
-        wavStream.read(buffer.array(), buffer.arrayOffset(), buffer.capacity());
-
-        buffer.rewind();
-        buffer.position(buffer.position() + 20);
-        int format = buffer.getShort();
-        int channels = buffer.getShort();
-        int rate = buffer.getInt();
-        buffer.position(buffer.position() + 6);
-        int depth = buffer.getShort();
-        int dataSize = 0;
-        while (buffer.getInt() != 0x61746164) { // "data" marker
-            Log.d(TAG, "Skipping non-data chunk");
-            int size = buffer.getInt();
-            wavStream.skip(size);
-
-            buffer.rewind();
-            wavStream.read(buffer.array(), buffer.arrayOffset(), 8);
-            buffer.rewind();
-        }
-        dataSize = buffer.getInt();
-
-        return new AudioFileInfo(format, channels, rate, depth, dataSize);
-    }
-
-    public static byte[] readWavPcm(AudioFileInfo info, InputStream stream) throws IOException {
-        byte[] data = new byte[info.dataSize];
-        stream.read(data, 0, data.length);
-        return data;
-    }
 
     static ArrayList<ObjectFile> getFileList(File path) {
         makeDirectoryIfNeeded();
