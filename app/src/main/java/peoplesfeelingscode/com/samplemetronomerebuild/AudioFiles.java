@@ -49,7 +49,7 @@ public class AudioFiles {
             }
 
             format = extractor.getTrackFormat(0);
-            Log.d("************", "mediaformat tostring: " + format.toString());
+            Log.d(Dry.TAG, "mediaformat tostring: " + format.toString());
             if (format.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
                 extractor.selectTrack(0);
             } else {
@@ -109,7 +109,7 @@ public class AudioFiles {
                         codecOutputBuffers = decoder.getOutputBuffers();
                     } else if (outBuff == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                         oformat = decoder.getOutputFormat();
-                        Log.d("************", "output format " + oformat.toString());
+                        Log.d(Dry.TAG, "output format " + oformat.toString());
                     }
                 }
 
@@ -118,8 +118,8 @@ public class AudioFiles {
 
                 byte[] decodedBytes = Dry.MyShortsToBytes(decodedShorts);
 
-                Log.d("************", "decodedShorts.length: " + decodedShorts.length);
-                Log.d("************", "decodedBytes.length: " + decodedBytes.length);
+                Log.d(Dry.TAG, "decodedShorts.length: " + decodedShorts.length);
+                Log.d(Dry.TAG, "decodedBytes.length: " + decodedBytes.length);
 
                 service.at = new AudioTrack(
                         AudioManager.STREAM_MUSIC,

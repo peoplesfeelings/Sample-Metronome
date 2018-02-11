@@ -50,12 +50,12 @@ public class MyService extends Service {
 
         setUpForeground();
 
-        Log.d("**************", "service oncreate");
+        Log.d(Dry.TAG, "service oncreate");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("**************", "service onbind");
+        Log.d(Dry.TAG, "service onbind");
 
         return mBinder;
     }
@@ -64,7 +64,7 @@ public class MyService extends Service {
     public void onDestroy() {
         super.onDestroy();
 
-        Log.d("**************", "service ondestroy");
+        Log.d(Dry.TAG, "service ondestroy");
     }
 
     void start() {
@@ -101,7 +101,7 @@ public class MyService extends Service {
         startForeground(ONGOING_NOTIFICATION_ID, notification);
         playing = true;
 
-        Log.d("*************", "service - start");
+        Log.d(Dry.TAG, "service - start");
     }
 
     void stop() {
@@ -110,7 +110,7 @@ public class MyService extends Service {
         stopForeground(true);
         playing = false;
 
-        Log.d("*************", "service - stop");
+        Log.d(Dry.TAG, "service - stop");
     }
 
     void setUpForeground() {

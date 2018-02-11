@@ -100,7 +100,7 @@ public class ActivityMain extends ActivityBase {
         getPermissionForWrite();
         checkForOldFolder();
 
-        Log.d("******************", "activity oncreate");
+        Log.d(Dry.TAG, "activity oncreate");
     }
 
     @Override
@@ -125,7 +125,7 @@ public class ActivityMain extends ActivityBase {
             stopService(new Intent(this, MyService.class));
         }
 
-        Log.d("******************", "activity ondestroy");
+        Log.d(Dry.TAG, "activity ondestroy");
     }
 
     @Override
@@ -201,7 +201,7 @@ public class ActivityMain extends ActivityBase {
                 setUpSpinner();
                 setUpListeners();
 
-                Log.d("*************", "serviceconnection connected");
+                Log.d(Dry.TAG, "serviceconnection connected");
             }
 
             @Override
@@ -209,7 +209,7 @@ public class ActivityMain extends ActivityBase {
                 service = null;
                 bound = false;
 
-                Log.d("*************", "serviceconnection disconnected");
+                Log.d(Dry.TAG, "serviceconnection disconnected");
             }
         };
     }

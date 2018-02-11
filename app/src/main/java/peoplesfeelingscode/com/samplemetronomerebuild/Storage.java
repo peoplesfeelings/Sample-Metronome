@@ -105,7 +105,7 @@ public class Storage {
                 fos.write(buffer);
                 fos.close();
             } catch (IOException e) {
-                Log.d("**********", "error moving files[" + i + "]");
+                Log.d(Dry.TAG, "error moving files[" + i + "]");
             }
         }
     }
@@ -139,7 +139,7 @@ public class Storage {
             fos.write(null);
             fos.close();
         } catch (Exception e) {
-            Log.d("***********", "error3");
+            Log.d(Dry.TAG, "error3");
         }
     }
 
@@ -157,7 +157,7 @@ public class Storage {
                 }
                 ins.close();
             } catch (Exception e) {
-                Log.d("***********", "error");
+                Log.d(Dry.TAG, "error");
             }
             buffer=outputStream.toByteArray();
             try {
@@ -165,7 +165,7 @@ public class Storage {
                 fos.write(buffer);
                 fos.close();
             } catch (Exception e) {
-                Log.d("***********", "error2");
+                Log.d(Dry.TAG, "error2");
             }
         }
     }
