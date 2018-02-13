@@ -36,7 +36,7 @@ public class AudioFiles {
         MediaFormat oformat = null;
 
         MediaExtractor extractor = new MediaExtractor();
-        MediaFormat format;
+        MediaFormat sourceFormat;
         ByteBuffer[] codecInputBuffers;
         ByteBuffer[] codecOutputBuffers;
 
@@ -48,9 +48,11 @@ public class AudioFiles {
                 return false;
             }
 
-            format = extractor.getTrackFormat(0);
-            Log.d(Dry.TAG, "mediaformat tostring: " + format.toString());
-            if (format.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
+            sourceFormat = extractor.getTrackFormat(0);
+
+            Log.d(Dry.TAG, "source mediaformat tostring: " + sourceFormat.toString());
+
+            if (sourceFormat.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
                 extractor.selectTrack(0);
             } else {
                 service.handleFileProblem("MIME type doesn't match file extension.");
@@ -59,7 +61,7 @@ public class AudioFiles {
 
             try {
                 decoder = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_MPEG);
-                decoder.configure(format, null, null, 0);
+                decoder.configure(sourceFormat, null, null, 0);
                 decoder.start();
                 codecInputBuffers = decoder.getInputBuffers();
                 codecOutputBuffers = decoder.getOutputBuffers();
@@ -89,6 +91,8 @@ public class AudioFiles {
                             if (!inputEOS) {
                                 extractor.advance();
                             }
+                        } else {
+                            Log.d(Dry.TAG, "dequeueInputBuffer returned -1");
                         }
                     }
                     int outBuff = decoder.dequeueOutputBuffer(bufferInfo, TIMEOUTUS);

@@ -77,6 +77,9 @@ public class ActivityMain extends ActivityBase {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(Dry.TAG, "onCreate");
+
         setContentView(R.layout.activity_main);
 
         bound = false;

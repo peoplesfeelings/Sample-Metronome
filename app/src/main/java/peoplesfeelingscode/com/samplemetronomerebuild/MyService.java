@@ -130,6 +130,9 @@ public class MyService extends Service {
     }
 
     boolean loadFile(String fileName) {
+
+        Log.d(Dry.TAG, "filename: " + fileName);
+
         boolean success;
 
         ext = FilenameUtils.getExtension(fileName);
