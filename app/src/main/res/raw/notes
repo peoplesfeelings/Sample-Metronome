@@ -35,6 +35,10 @@ audiotrack
         exoplayer
             https://google.github.io/ExoPlayer/guide.html
             https://developer.android.com/guide/topics/media/exoplayer.html
+        openmxplayer
+            https://www.pocketmagic.net/android-audio-player-using-mediacodec-mediaextractor/
+            decoder code
+                https://github.com/radhoo/android-openmxplayer/blob/master/OpenMXPlayer/src/net/pocketmagic/android/openmxplayer/OpenMXPlayer.java
     better to decode async?
     mediaextractor
         https://www.programcreek.com/java-api-examples/index.php?api=android.media.MediaExtractor
@@ -50,10 +54,6 @@ audiotrack
             https://bigflake.com/mediacodec/
             links to DecoderTest.java
                 https://android.googlesource.com/platform/cts/+/jb-mr2-release/tests/tests/media/src/android/media/cts/DecoderTest.java
-        openmxplayer
-            https://www.pocketmagic.net/android-audio-player-using-mediacodec-mediaextractor/
-            decoder code
-                https://github.com/radhoo/android-openmxplayer/blob/master/OpenMXPlayer/src/net/pocketmagic/android/openmxplayer/OpenMXPlayer.java
     checks
         implement check for length, since not streaming pcm into audiotrack
         how will various sample rates work with SAMPLE_RATE_UNSPECIFIED set

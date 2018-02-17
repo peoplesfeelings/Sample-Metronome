@@ -31,9 +31,17 @@ public class AudioFiles {
     static boolean loadMp3(String fileName, MyService service) {
         MediaCodec decoder;
 
+
+
+
+        boolean reconfigure = true;
+
+
+
+
         short [] decodedShorts = new short[0];
         int decodedIndex = 0;
-        MediaFormat oformat = null;
+        MediaFormat outputformat = null;
 
         MediaExtractor extractor = new MediaExtractor();
         MediaFormat sourceFormat;
@@ -54,7 +62,10 @@ public class AudioFiles {
 
         sourceFormat = extractor.getTrackFormat(0);
 
-        Log.d(Dry.TAG, "source mediaformat tostring: " + sourceFormat.toString());
+        int sampleRate = sourceFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+        int channels = sourceFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
+
+        Log.d(Dry.TAG, "source format tostring: " + sourceFormat.toString());
 
         if (sourceFormat.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
             extractor.selectTrack(0);
@@ -84,6 +95,8 @@ public class AudioFiles {
                 if (inputBufIndex >= 0) {
                     ByteBuffer inputByteBuffer = codecInputBuffers[inputBufIndex];
                     int sampleSize = extractor.readSampleData(inputByteBuffer, 0 );
+                    Log.d(Dry.TAG, "inputByteBuffer: " + inputByteBuffer.toString());
+                    Log.d(Dry.TAG, "sampleSize: " + sampleSize);
                     long presentationTimeUs = 0;
                     if (sampleSize < 0) {
                         inputEOS = true;
@@ -105,10 +118,33 @@ public class AudioFiles {
                 }
             }
             int outBuff = decoder.dequeueOutputBuffer(bufferInfo, TIMEOUTUS);
+
+            Log.d(Dry.TAG, "bufferInfo.size(): " + bufferInfo.size);
+
             if (outBuff >= 0) {
+
+
+
+//                if (bufferInfo.size > 0 && (reconfigure)) {
+//                    // once we've gotten some data out of the decoder, reconfigure it again
+//                    reconfigure = false;
+//                    extractor.seekTo(0, MediaExtractor.SEEK_TO_NEXT_SYNC);
+//                    inputEOS = false;
+//                    decoder.stop();
+//                    decoder.configure(sourceFormat, null /* surface */, null /* crypto */, 0 /* flags */);
+//                    decoder.start();
+//                    codecInputBuffers = decoder.getInputBuffers();
+//                    codecOutputBuffers = decoder.getOutputBuffers();
+//                    continue;
+//                }
+
+
+
+
                 int outputBufIndex = outBuff;
                 ByteBuffer buf = codecOutputBuffers[outputBufIndex];
                 if (decodedIndex + (bufferInfo.size / 2) >= decodedShorts.length) {
+//                    Log.d(Dry.TAG, "decodedShorts copied");
                     decodedShorts = Arrays.copyOf(decodedShorts, decodedIndex + (bufferInfo.size / 2));
                 }
                 for (int i = 0; i < bufferInfo.size; i += 2) {
@@ -118,13 +154,17 @@ public class AudioFiles {
                 if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     outputEOS = true;
                 }
+                outputformat = decoder.getOutputFormat();
+//                Log.d(Dry.TAG, "output format in loop: " + outputformat.toString());
             } else if (outBuff == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                 codecOutputBuffers = decoder.getOutputBuffers();
             } else if (outBuff == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                oformat = decoder.getOutputFormat();
-                Log.d(Dry.TAG, "output format " + oformat.toString());
+                outputformat = decoder.getOutputFormat();
+//                Log.d(Dry.TAG, "output format INFO_OUTPUT_FORMAT_CHANGED: " + outputformat.toString());
             }
         }
+
+        Log.d(Dry.TAG, "output format after loop: " + outputformat.toString());
 
         decoder.stop();
         decoder.release();
@@ -136,13 +176,13 @@ public class AudioFiles {
 
         service.at = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
-                oformat.getInteger(MediaFormat.KEY_SAMPLE_RATE),
-                (oformat.getInteger(MediaFormat.KEY_CHANNEL_COUNT) == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
+                outputformat.getInteger(MediaFormat.KEY_SAMPLE_RATE),
+                (outputformat.getInteger(MediaFormat.KEY_CHANNEL_COUNT) == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
                 AudioFormat.ENCODING_PCM_16BIT,
                 decodedBytes.length,
                 AudioTrack.MODE_STATIC);
         service.at.write(decodedBytes,0,decodedBytes.length);
-        service.at.setPlaybackRate(oformat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
+        service.at.setPlaybackRate(outputformat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
 
         extractor.release();
 
