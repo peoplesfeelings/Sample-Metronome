@@ -17,6 +17,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
+import javazoom.jl.decoder.Decoder;
+
 import static android.content.ContentValues.TAG;
 
 public class AudioFiles {
@@ -27,6 +29,10 @@ public class AudioFiles {
     static final int[] SUPPORTED_SAMPLE_RATES = { 44100, 48000 };
 
     //////////////// mp3 stuff /////////////////
+
+    static void jLayerTest() {
+        Decoder decoder;
+    }
 
     static boolean loadMp3(String fileName, MyService service) {
         MediaCodec decoder;

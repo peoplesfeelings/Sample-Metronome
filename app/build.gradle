@@ -33,4 +33,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':HGDialV2-release')
     compile 'commons-io:commons-io:2.6'
+    compileOnly project(':jl1.0.1')
 }
