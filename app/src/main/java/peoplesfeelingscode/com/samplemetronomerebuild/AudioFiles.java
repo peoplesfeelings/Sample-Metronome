@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 
 import javazoom.jl.decoder.Bitstream;
 import javazoom.jl.decoder.Decoder;
@@ -111,8 +110,8 @@ public class AudioFiles {
 
         MediaExtractor extractor = new MediaExtractor();
         MediaFormat sourceFormat;
-        ByteBuffer[] codecInputBuffers;
-        ByteBuffer[] codecOutputBuffers;
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         try {
             extractor.setDataSource(Storage.path + File.separator + fileName);
@@ -145,9 +144,7 @@ public class AudioFiles {
 
         decoder.configure(sourceFormat, null, null, 0);
         decoder.start();
-        codecInputBuffers = decoder.getInputBuffers();
-        codecOutputBuffers = decoder.getOutputBuffers();
-        Log.d(Dry.TAG, "codecInputBuffers.length: " + codecInputBuffers.length);
+
 
         MediaCodec.BufferInfo outputBufferInfo = new MediaCodec.BufferInfo();
         boolean inputEOS = false;
@@ -157,7 +154,8 @@ public class AudioFiles {
             if (!inputEOS) {
                 int inputBufIndex = decoder.dequeueInputBuffer(TIMEOUTUS);
                 if (inputBufIndex >= 0) {
-                    int sampleSize = extractor.readSampleData(codecInputBuffers[inputBufIndex], 0 );
+                    ByteBuffer inputBuffer = decoder.getInputBuffer(inputBufIndex);
+                    int sampleSize = extractor.readSampleData(inputBuffer, 0 );
                     Log.d(Dry.TAG, "sampleSize: " + sampleSize);
                     if (sampleSize < 0) {
                         inputEOS = true;
@@ -185,19 +183,15 @@ public class AudioFiles {
             Log.d(Dry.TAG, "outputBufferInfo.size: " + outputBufferInfo.size);
 
             if (outputBufferIndex >= 0) {
-                if (decodedIndex + (outputBufferInfo.size / 2) >= decodedShorts.length) {
-                    decodedShorts = Arrays.copyOf(decodedShorts, decodedIndex + (outputBufferInfo.size / 2));
-                }
-                for (int i = 0; i < outputBufferInfo.size; i += 2) {
-                    decodedShorts[decodedIndex++] = codecOutputBuffers[outputBufferIndex].getShort(i);
+                ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferIndex);
+                for (int i = 0; i < outputBufferInfo.size; i++) {
+                    byteArrayOutputStream.write(outputBuffer.get(i));
                 }
                 decoder.releaseOutputBuffer(outputBufferIndex, false);
                 if ((outputBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     outputEOS = true;
                 }
                 outputformat = decoder.getOutputFormat();
-            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
-                codecOutputBuffers = decoder.getOutputBuffers();
             } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 outputformat = decoder.getOutputFormat();
             }
@@ -208,7 +202,7 @@ public class AudioFiles {
         decoder.stop();
         decoder.release();
 
-        byte[] decodedBytes = Dry.shortsToBytes(decodedShorts);
+        byte[] decodedBytes = byteArrayOutputStream.toByteArray();
 
         Log.d(Dry.TAG, "decodedShorts.length: " + decodedShorts.length);
         Log.d(Dry.TAG, "decodedBytes.length: " + decodedBytes.length);
