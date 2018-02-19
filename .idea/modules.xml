@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/HGDialV2-release/HGDialV2-release.iml" filepath="$PROJECT_DIR$/HGDialV2-release/HGDialV2-release.iml" />
       <module fileurl="file://$PROJECT_DIR$/SampleMetronome(rebuild).iml" filepath="$PROJECT_DIR$/SampleMetronome(rebuild).iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jl1.0.1/jl1.0.1.iml" filepath="$PROJECT_DIR$/jl1.0.1/jl1.0.1.iml" />
     </modules>
   </component>
 </project>

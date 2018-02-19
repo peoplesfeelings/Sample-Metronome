@@ -17,11 +17,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javazoom.jl.decoder.Bitstream;
-import javazoom.jl.decoder.Decoder;
-import javazoom.jl.decoder.Header;
-import javazoom.jl.decoder.SampleBuffer;
-
 import static android.content.ContentValues.TAG;
 
 public class AudioFiles {
@@ -33,84 +28,11 @@ public class AudioFiles {
 
     //////////////// mp3 stuff /////////////////
 
-    static boolean decodeWithJlayer(String fileName, MyService service) {
-        Log.d(Dry.TAG, "decoding with jlayer");
-        Decoder decoder;
-        Bitstream bitStream;
-        SampleBuffer sampleBuffer = null;
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Header h;
-
-        try {
-            bitStream = new Bitstream(new FileInputStream(Storage.path + File.separator + fileName));
-        } catch (FileNotFoundException e) {
-            //
-            Log.d(Dry.TAG, "Exception initializing bitstream");
-            return false;
-        }
-
-        while (true) {
-            decoder = new Decoder();
-            try {
-                h = bitStream.readFrame();
-            } catch (Exception e) {
-                //
-                return false;
-            }
-
-            if (h != null) {
-                try {
-                    sampleBuffer = (SampleBuffer) decoder.decodeFrame(h, bitStream); //returns the next 2304 samples
-                } catch (javazoom.jl.decoder.DecoderException e) {
-                    //
-                    return false;
-                }
-            } else {
-//                bitStream.closeFrame();
-                break;
-            }
-            bitStream.closeFrame();
-
-            if (sampleBuffer != null) {
-                try {
-                    outputStream.write(Dry.shortsToBytes(sampleBuffer.getBuffer()));
-                } catch (IOException e) {
-                    //
-                    Log.d(Dry.TAG, "Exception writing to output stream");
-                    return false;
-                }
-            }
-        }
-
-        byte[] byteArray = outputStream.toByteArray();
-
-        Log.d(Dry.TAG, "byte array size: " + byteArray.length);
-
-        service.at = new AudioTrack(
-                AudioManager.STREAM_MUSIC,
-                decoder.getOutputFrequency(),
-                (decoder.getOutputChannels() == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
-                AudioFormat.ENCODING_PCM_16BIT,
-                byteArray.length,
-                AudioTrack.MODE_STATIC);
-        service.at.write(byteArray,0,byteArray.length);
-        service.at.setPlaybackRate(decoder.getOutputFrequency());
-
-        return true;
-    }
-
     static boolean loadMp3(String fileName, MyService service) {
         MediaCodec decoder;
-
-//        boolean reconfigure = true;
-
-        short [] decodedShorts = new short[0];
-        int decodedIndex = 0;
         MediaFormat outputformat = null;
-
         MediaExtractor extractor = new MediaExtractor();
         MediaFormat sourceFormat;
-
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         try {
@@ -120,20 +42,8 @@ public class AudioFiles {
             return false;
         }
 
-        if (extractor.getTrackCount() > 1) {
-            service.handleFileProblem("Multiple tracks in file.");
-            return false;
-        }
-
         sourceFormat = extractor.getTrackFormat(0);
-        Log.d(Dry.TAG, "source format tostring: " + sourceFormat.toString());
-
-        if (sourceFormat.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
-            extractor.selectTrack(0);
-        } else {
-            service.handleFileProblem("MIME type doesn't match file extension.");
-            return false;
-        }
+        extractor.selectTrack(0);
 
         try {
             decoder = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_MPEG);
@@ -145,7 +55,6 @@ public class AudioFiles {
         decoder.configure(sourceFormat, null, null, 0);
         decoder.start();
 
-
         MediaCodec.BufferInfo outputBufferInfo = new MediaCodec.BufferInfo();
         boolean inputEOS = false;
         boolean outputEOS = false;
@@ -156,10 +65,8 @@ public class AudioFiles {
                 if (inputBufIndex >= 0) {
                     ByteBuffer inputBuffer = decoder.getInputBuffer(inputBufIndex);
                     int sampleSize = extractor.readSampleData(inputBuffer, 0 );
-                    Log.d(Dry.TAG, "sampleSize: " + sampleSize);
                     if (sampleSize < 0) {
                         inputEOS = true;
-                        Log.d(Dry.TAG, "input eos true");
                         decoder.queueInputBuffer(
                                 inputBufIndex,
                                 0 ,
@@ -180,32 +87,31 @@ public class AudioFiles {
             }
 
             int outputBufferIndex = decoder.dequeueOutputBuffer(outputBufferInfo, TIMEOUTUS);
-            Log.d(Dry.TAG, "outputBufferInfo.size: " + outputBufferInfo.size);
 
             if (outputBufferIndex >= 0) {
                 ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferIndex);
+
                 for (int i = 0; i < outputBufferInfo.size; i++) {
                     byteArrayOutputStream.write(outputBuffer.get(i));
                 }
+
                 decoder.releaseOutputBuffer(outputBufferIndex, false);
+
                 if ((outputBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     outputEOS = true;
                 }
+
                 outputformat = decoder.getOutputFormat();
             } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 outputformat = decoder.getOutputFormat();
             }
         }
 
-        Log.d(Dry.TAG, "output format after loop: " + outputformat.toString());
-
+        extractor.release();
         decoder.stop();
         decoder.release();
 
         byte[] decodedBytes = byteArrayOutputStream.toByteArray();
-
-        Log.d(Dry.TAG, "decodedShorts.length: " + decodedShorts.length);
-        Log.d(Dry.TAG, "decodedBytes.length: " + decodedBytes.length);
 
         service.at = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
@@ -216,8 +122,6 @@ public class AudioFiles {
                 AudioTrack.MODE_STATIC);
         service.at.write(decodedBytes,0,decodedBytes.length);
         service.at.setPlaybackRate(outputformat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
-
-        extractor.release();
 
         return true;
     }

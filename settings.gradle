@@ -1,1 +1,1 @@
-include ':app', ':HGDialV2-release', ':jl1.0.1'
+include ':app', ':HGDialV2-release'
