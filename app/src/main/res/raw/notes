@@ -6,6 +6,9 @@ to do
     alert dialog for if audio file doesn't meet criteria
     android:description attribute to the <service> element in your app manifest
     fix wonky beginning
+    if loadFile returns false,
+        button text should not change
+        check for any other state that needs to be updated
 
 check
     the wav parsing code assumes little endian...

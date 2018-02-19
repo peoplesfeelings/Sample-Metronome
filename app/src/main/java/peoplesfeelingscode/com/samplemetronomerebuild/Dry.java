@@ -39,7 +39,7 @@ public class Dry {
         return str;
     }
 
-//    static byte[] MyShortsToBytes(short[] buffer) {
+//    static byte[] shortsToBytes(short[] buffer) {
 //        int N = buffer.length;
 //        short min = 0;
 //        short max = 0;
@@ -58,7 +58,7 @@ public class Dry {
 //    }
 
     // cleaner, more expensive
-    static byte[] MyShortsToBytes(short[] buffer) {
+    static byte[] shortsToBytes(short[] buffer) {
         int N = buffer.length;
         float f[] = new float[N];
         float min = 0.0f;

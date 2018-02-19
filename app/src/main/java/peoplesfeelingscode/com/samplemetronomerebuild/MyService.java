@@ -145,11 +145,13 @@ public class MyService extends Service {
                 success = AudioFiles.loadWav(fileName, this);
                 break;
             case("mp3"):
-                success = AudioFiles.loadMp3(fileName, this);
+                success = AudioFiles.decodeWithJlayer(fileName, this);
                 break;
             default:
                 success = false;
         }
+
+        Log.d(Dry.TAG, "load success: " + success);
 
         if (success) {
             Storage.fileNeedsToBeLoaded = false;

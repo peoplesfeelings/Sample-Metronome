@@ -8,6 +8,7 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,7 +18,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
+import javazoom.jl.decoder.Bitstream;
 import javazoom.jl.decoder.Decoder;
+import javazoom.jl.decoder.Header;
+import javazoom.jl.decoder.SampleBuffer;
 
 import static android.content.ContentValues.TAG;
 
@@ -30,8 +34,70 @@ public class AudioFiles {
 
     //////////////// mp3 stuff /////////////////
 
-    static void jLayerTest() {
+    static boolean decodeWithJlayer(String fileName, MyService service) {
+        Log.d(Dry.TAG, "decoding with jlayer");
         Decoder decoder;
+        Bitstream bitStream;
+        SampleBuffer sampleBuffer = null;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Header h;
+
+        try {
+            bitStream = new Bitstream(new FileInputStream(Storage.path + File.separator + fileName));
+        } catch (FileNotFoundException e) {
+            //
+            Log.d(Dry.TAG, "Exception initializing bitstream");
+            return false;
+        }
+
+        while (true) {
+            decoder = new Decoder();
+            try {
+                h = bitStream.readFrame();
+            } catch (Exception e) {
+                //
+                return false;
+            }
+
+            if (h != null) {
+                try {
+                    sampleBuffer = (SampleBuffer) decoder.decodeFrame(h, bitStream); //returns the next 2304 samples
+                } catch (javazoom.jl.decoder.DecoderException e) {
+                    //
+                    return false;
+                }
+            } else {
+//                bitStream.closeFrame();
+                break;
+            }
+            bitStream.closeFrame();
+
+            if (sampleBuffer != null) {
+                try {
+                    outputStream.write(Dry.shortsToBytes(sampleBuffer.getBuffer()));
+                } catch (IOException e) {
+                    //
+                    Log.d(Dry.TAG, "Exception writing to output stream");
+                    return false;
+                }
+            }
+        }
+
+        byte[] byteArray = outputStream.toByteArray();
+
+        Log.d(Dry.TAG, "byte array size: " + byteArray.length);
+
+        service.at = new AudioTrack(
+                AudioManager.STREAM_MUSIC,
+                decoder.getOutputFrequency(),
+                (decoder.getOutputChannels() == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
+                AudioFormat.ENCODING_PCM_16BIT,
+                byteArray.length,
+                AudioTrack.MODE_STATIC);
+        service.at.write(byteArray,0,byteArray.length);
+        service.at.setPlaybackRate(decoder.getOutputFrequency());
+
+        return true;
     }
 
     static boolean loadMp3(String fileName, MyService service) {
@@ -175,7 +241,7 @@ public class AudioFiles {
         decoder.stop();
         decoder.release();
 
-        byte[] decodedBytes = Dry.MyShortsToBytes(decodedShorts);
+        byte[] decodedBytes = Dry.shortsToBytes(decodedShorts);
 
         Log.d(Dry.TAG, "decodedShorts.length: " + decodedShorts.length);
         Log.d(Dry.TAG, "decodedBytes.length: " + decodedBytes.length);
