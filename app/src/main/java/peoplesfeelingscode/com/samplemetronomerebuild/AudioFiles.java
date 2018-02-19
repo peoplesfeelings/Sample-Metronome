@@ -103,13 +103,7 @@ public class AudioFiles {
     static boolean loadMp3(String fileName, MyService service) {
         MediaCodec decoder;
 
-
-
-
-        boolean reconfigure = true;
-
-
-
+//        boolean reconfigure = true;
 
         short [] decodedShorts = new short[0];
         int decodedIndex = 0;
@@ -133,10 +127,6 @@ public class AudioFiles {
         }
 
         sourceFormat = extractor.getTrackFormat(0);
-
-        int sampleRate = sourceFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
-        int channels = sourceFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
-
         Log.d(Dry.TAG, "source format tostring: " + sourceFormat.toString());
 
         if (sourceFormat.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
@@ -157,82 +147,59 @@ public class AudioFiles {
         decoder.start();
         codecInputBuffers = decoder.getInputBuffers();
         codecOutputBuffers = decoder.getOutputBuffers();
+        Log.d(Dry.TAG, "codecInputBuffers.length: " + codecInputBuffers.length);
 
-        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+        MediaCodec.BufferInfo outputBufferInfo = new MediaCodec.BufferInfo();
         boolean inputEOS = false;
         boolean outputEOS = false;
+
         while (!outputEOS) {
             if (!inputEOS) {
                 int inputBufIndex = decoder.dequeueInputBuffer(TIMEOUTUS);
                 if (inputBufIndex >= 0) {
-                    ByteBuffer inputByteBuffer = codecInputBuffers[inputBufIndex];
-                    int sampleSize = extractor.readSampleData(inputByteBuffer, 0 );
-                    Log.d(Dry.TAG, "inputByteBuffer: " + inputByteBuffer.toString());
+                    int sampleSize = extractor.readSampleData(codecInputBuffers[inputBufIndex], 0 );
                     Log.d(Dry.TAG, "sampleSize: " + sampleSize);
-                    long presentationTimeUs = 0;
                     if (sampleSize < 0) {
                         inputEOS = true;
-                        sampleSize = 0;
+                        Log.d(Dry.TAG, "input eos true");
+                        decoder.queueInputBuffer(
+                                inputBufIndex,
+                                0 ,
+                                0,
+                                0,
+                                MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                     } else {
-                        presentationTimeUs = extractor.getSampleTime();
-                    }
-                    decoder.queueInputBuffer(
-                            inputBufIndex,
-                            0 ,
-                            sampleSize,
-                            presentationTimeUs,
-                            inputEOS ? MediaCodec.BUFFER_FLAG_END_OF_STREAM : 0);
-                    if (!inputEOS) {
+                        long presentationTimeUs = extractor.getSampleTime();
+                        decoder.queueInputBuffer(
+                                inputBufIndex,
+                                0 ,
+                                sampleSize,
+                                presentationTimeUs,
+                                0);
                         extractor.advance();
                     }
-                } else {
-                    Log.d(Dry.TAG, "dequeueInputBuffer returned -1");
                 }
             }
-            int outBuff = decoder.dequeueOutputBuffer(bufferInfo, TIMEOUTUS);
 
-            Log.d(Dry.TAG, "bufferInfo.size(): " + bufferInfo.size);
+            int outputBufferIndex = decoder.dequeueOutputBuffer(outputBufferInfo, TIMEOUTUS);
+            Log.d(Dry.TAG, "outputBufferInfo.size: " + outputBufferInfo.size);
 
-            if (outBuff >= 0) {
-
-
-
-//                if (bufferInfo.size > 0 && (reconfigure)) {
-//                    // once we've gotten some data out of the decoder, reconfigure it again
-//                    reconfigure = false;
-//                    extractor.seekTo(0, MediaExtractor.SEEK_TO_NEXT_SYNC);
-//                    inputEOS = false;
-//                    decoder.stop();
-//                    decoder.configure(sourceFormat, null /* surface */, null /* crypto */, 0 /* flags */);
-//                    decoder.start();
-//                    codecInputBuffers = decoder.getInputBuffers();
-//                    codecOutputBuffers = decoder.getOutputBuffers();
-//                    continue;
-//                }
-
-
-
-
-                int outputBufIndex = outBuff;
-                ByteBuffer buf = codecOutputBuffers[outputBufIndex];
-                if (decodedIndex + (bufferInfo.size / 2) >= decodedShorts.length) {
-//                    Log.d(Dry.TAG, "decodedShorts copied");
-                    decodedShorts = Arrays.copyOf(decodedShorts, decodedIndex + (bufferInfo.size / 2));
+            if (outputBufferIndex >= 0) {
+                if (decodedIndex + (outputBufferInfo.size / 2) >= decodedShorts.length) {
+                    decodedShorts = Arrays.copyOf(decodedShorts, decodedIndex + (outputBufferInfo.size / 2));
                 }
-                for (int i = 0; i < bufferInfo.size; i += 2) {
-                    decodedShorts[decodedIndex++] = buf.getShort(i);
+                for (int i = 0; i < outputBufferInfo.size; i += 2) {
+                    decodedShorts[decodedIndex++] = codecOutputBuffers[outputBufferIndex].getShort(i);
                 }
-                decoder.releaseOutputBuffer(outputBufIndex, false);
-                if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                decoder.releaseOutputBuffer(outputBufferIndex, false);
+                if ((outputBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     outputEOS = true;
                 }
                 outputformat = decoder.getOutputFormat();
-//                Log.d(Dry.TAG, "output format in loop: " + outputformat.toString());
-            } else if (outBuff == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                 codecOutputBuffers = decoder.getOutputBuffers();
-            } else if (outBuff == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 outputformat = decoder.getOutputFormat();
-//                Log.d(Dry.TAG, "output format INFO_OUTPUT_FORMAT_CHANGED: " + outputformat.toString());
             }
         }
 

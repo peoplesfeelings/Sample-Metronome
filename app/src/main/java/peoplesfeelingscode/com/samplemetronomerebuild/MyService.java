@@ -145,7 +145,7 @@ public class MyService extends Service {
                 success = AudioFiles.loadWav(fileName, this);
                 break;
             case("mp3"):
-                success = AudioFiles.decodeWithJlayer(fileName, this);
+                success = AudioFiles.loadMp3(fileName, this);
                 break;
             default:
                 success = false;
