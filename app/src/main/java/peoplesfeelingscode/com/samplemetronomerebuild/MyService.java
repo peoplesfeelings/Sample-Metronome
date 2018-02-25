@@ -83,6 +83,7 @@ public class MyService extends Service {
                 if (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
                     at.stop();
                 }
+
                 at.play();
 
                 if (startTime == -1) {
@@ -130,11 +131,11 @@ public class MyService extends Service {
     }
 
     boolean loadFile(String fileName) {
-
+        if (at != null) {
+            at.release();
+        }
         Log.d(Dry.TAG, "filename: " + fileName);
-
         boolean success;
-
         ext = FilenameUtils.getExtension(fileName);
 
         switch (ext.toLowerCase()) {

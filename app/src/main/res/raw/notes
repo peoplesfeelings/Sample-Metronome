@@ -25,6 +25,7 @@ to do
     about
         precision blurb
         apache commons io
+            filenameutils
         update accepted files
 
 store listing
