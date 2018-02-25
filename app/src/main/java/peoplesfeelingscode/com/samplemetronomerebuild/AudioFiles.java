@@ -43,6 +43,9 @@ public class AudioFiles {
         }
 
         sourceFormat = extractor.getTrackFormat(0);
+
+        Log.d(Dry.TAG, "source format: " + sourceFormat.toString());
+
         extractor.selectTrack(0);
 
         try {

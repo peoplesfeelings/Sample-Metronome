@@ -5,13 +5,7 @@ to do
     if loadFile returns false,
         button text should not change
         check for any other state that needs to be updated
-    flac
-        implement check for bit depth
     om click listener for sample screen list items
-
-    fix
-        java.lang.IllegalStateException: play() called on uninitialized AudioTrack.
-            when changing selected sample
 
     check
         the wav parsing code assumes little endian...

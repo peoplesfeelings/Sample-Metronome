@@ -42,6 +42,7 @@
             android:launchMode="singleTask" />
 
         <service
+            android:description="@string/txtServiceDescription"
             android:name=".MyService"
             android:enabled="true"
             android:exported="false"></service>
