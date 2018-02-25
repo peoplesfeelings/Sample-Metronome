@@ -138,9 +138,9 @@ public class MyService extends Service {
         ext = FilenameUtils.getExtension(fileName);
 
         switch (ext.toLowerCase()) {
-//            case("flac"):
-//
-//                break;
+            case("flac"):
+                success = AudioFiles.loadFlac(fileName, this);
+                break;
             case("wav"):
                 success = AudioFiles.loadWav(fileName, this);
                 break;

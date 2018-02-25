@@ -26,6 +26,106 @@ public class AudioFiles {
     static final int[] SUPPORTED_CHANNELS = { 1, 2 };
     static final int[] SUPPORTED_SAMPLE_RATES = { 44100, 48000 };
 
+    //////////////// flac stuff /////////////////
+
+    static boolean loadFlac(String fileName, MyService service) {
+        MediaCodec decoder;
+        MediaFormat outputformat = null;
+        MediaExtractor extractor = new MediaExtractor();
+        MediaFormat sourceFormat;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        try {
+            extractor.setDataSource(Storage.path + File.separator + fileName);
+        } catch (IOException e) {
+            service.handleFileProblem("Error: exception thrown when trying to extract data from file " + fileName);
+            return false;
+        }
+
+        sourceFormat = extractor.getTrackFormat(0);
+        extractor.selectTrack(0);
+
+        try {
+            decoder = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_FLAC);
+        } catch (IOException e) {
+            service.handleFileProblem("Failed to instantiate FLAC MediaCodec.");
+            return false;
+        }
+
+        decoder.configure(sourceFormat, null, null, 0);
+        decoder.start();
+
+        MediaCodec.BufferInfo outputBufferInfo = new MediaCodec.BufferInfo();
+        boolean inputEOS = false;
+        boolean outputEOS = false;
+
+        while (!outputEOS) {
+            if (!inputEOS) {
+                int inputBufIndex = decoder.dequeueInputBuffer(TIMEOUTUS);
+                if (inputBufIndex >= 0) {
+                    ByteBuffer inputBuffer = decoder.getInputBuffer(inputBufIndex);
+                    int sampleSize = extractor.readSampleData(inputBuffer, 0 );
+                    if (sampleSize < 0) {
+                        inputEOS = true;
+                        decoder.queueInputBuffer(
+                                inputBufIndex,
+                                0 ,
+                                0,
+                                0,
+                                MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                    } else {
+                        long presentationTimeUs = extractor.getSampleTime();
+                        decoder.queueInputBuffer(
+                                inputBufIndex,
+                                0 ,
+                                sampleSize,
+                                presentationTimeUs,
+                                0);
+                        extractor.advance();
+                    }
+                }
+            }
+
+            int outputBufferIndex = decoder.dequeueOutputBuffer(outputBufferInfo, TIMEOUTUS);
+
+            if (outputBufferIndex >= 0) {
+                ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferIndex);
+
+                for (int i = 0; i < outputBufferInfo.size; i++) {
+                    byteArrayOutputStream.write(outputBuffer.get(i));
+                }
+
+                decoder.releaseOutputBuffer(outputBufferIndex, false);
+
+                if ((outputBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                    outputEOS = true;
+                }
+
+                outputformat = decoder.getOutputFormat();
+            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                outputformat = decoder.getOutputFormat();
+            }
+        }
+
+        extractor.release();
+        decoder.stop();
+        decoder.release();
+
+        byte[] decodedBytes = byteArrayOutputStream.toByteArray();
+
+        service.at = new AudioTrack(
+                AudioManager.STREAM_MUSIC,
+                outputformat.getInteger(MediaFormat.KEY_SAMPLE_RATE),
+                (outputformat.getInteger(MediaFormat.KEY_CHANNEL_COUNT) == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO),
+                AudioFormat.ENCODING_PCM_16BIT,
+                decodedBytes.length,
+                AudioTrack.MODE_STATIC);
+        service.at.write(decodedBytes,0,decodedBytes.length);
+        service.at.setPlaybackRate(outputformat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
+
+        return true;
+    }
+
     //////////////// mp3 stuff /////////////////
 
     static boolean loadMp3(String fileName, MyService service) {

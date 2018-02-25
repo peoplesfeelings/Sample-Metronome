@@ -62,7 +62,7 @@ public class Storage {
     static final String SHARED_PREF_RATE_KEY = "rate";
     static final String SHARED_PREF_SELECTED_FILE_KEY = "selected file";
 
-    static final String[] SUPPORTED_FILE_EXTENSIONS = { "3gp", "mp4", "m4a", "aac", "flac", "mp3", "mkv", "wav", "ogg"};
+    static final String[] SUPPORTED_FILE_EXTENSIONS = { "flac", "mp3", "wav" };
 
     static final double DEFAULT_BPM = 120.0;
     static final int DEFAULT_RATE = 1;

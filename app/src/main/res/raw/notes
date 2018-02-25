@@ -1,74 +1,48 @@
 to do
-    mp3
-        check for mpeg versions?
-        check for joint stereo?
-        is using 16 bit depth across the board safe
     alert dialog for if audio file doesn't meet criteria
     android:description attribute to the <service> element in your app manifest
     fix wonky beginning
     if loadFile returns false,
         button text should not change
         check for any other state that needs to be updated
+    flac
+        implement check for bit depth
+    om click listener for sample screen list items
 
-check
-    the wav parsing code assumes little endian...
-    if there are no files, does loadFile and start() fail gracefully
-    handler.postattime works if time is missed
+    fix
+        java.lang.IllegalStateException: play() called on uninitialized AudioTrack.
+            when changing selected sample
 
-test
-    induce lost serviceconncection and see
-        if start/stop listener fails gracefully
-        if service keeps running after activity is destroyed (when not playing)
+    check
+        the wav parsing code assumes little endian...
+        if there are no files, does loadFile and start() fail gracefully
+        handler.postattime works if time is missed
 
-about
-    precision blurb
-    apache commons io
-    justflac
-    update accepted files
+    test
+        induce lost serviceconncection and see
+            if start/stop listener fails gracefully
+            if service keeps running after activity is destroyed (when not playing)
+    about
+        precision blurb
+        apache commons io
+        update accepted files
 
 store listing
     precision
     connect by usb. put in sample_metronome folder
+    update accepted files
 
 maybe do
     move fileNeedsToBeLoaded to Dry
 
 audiotrack
-    module
-        exoplayer
-            https://google.github.io/ExoPlayer/guide.html
-            https://developer.android.com/guide/topics/media/exoplayer.html
-        openmxplayer
-            https://www.pocketmagic.net/android-audio-player-using-mediacodec-mediaextractor/
-            decoder code
-                https://github.com/radhoo/android-openmxplayer/blob/master/OpenMXPlayer/src/net/pocketmagic/android/openmxplayer/OpenMXPlayer.java
     better to decode async?
-    mediaextractor
-        https://www.programcreek.com/java-api-examples/index.php?api=android.media.MediaExtractor
-    short array to byte array
-        https://stackoverflow.com/questions/10804852/how-to-convert-short-array-to-byte-array/12347176#12347176
-        https://stackoverflow.com/questions/15124050/audiotrack-short-array-to-byte-array-distortion-using-jlayerjava-mp3-decoder
-    native codecs
-        example
-            https://gist.github.com/a-m-s/1991ab18fbcb0fcc2cf9
-        another example
-            https://dpsm.wordpress.com/category/android/
-        another example
-            https://bigflake.com/mediacodec/
-            links to DecoderTest.java
-                https://android.googlesource.com/platform/cts/+/jb-mr2-release/tests/tests/media/src/android/media/cts/DecoderTest.java
     checks
         implement check for length, since not streaming pcm into audiotrack
         how will various sample rates work with SAMPLE_RATE_UNSPECIFIED set
         does format need to be specified
         note buffer size limit for user?
         call release in onstop?
-    ndk and c/c++ libraries to get pcm data like libmad?
-    non-native codecs
-        jlayer for mp3
-            http://www.badlogicgames.com/forum/viewtopic.php?f=11&t=17829
-        https://0110.be/posts/Decode_MP3s_and_other_Audio_formats_the_easy_way_on_Android
-        openjdk include like this dude says? https://stackoverflow.com/questions/16803343/javax-cannot-be-imported-in-my-android-app
     source
         https://android.googlesource.com/platform/frameworks/base/+/android-4.4_r1/media/java/android/media/AudioTrack.java
 
