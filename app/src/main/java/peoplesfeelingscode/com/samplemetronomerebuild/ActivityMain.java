@@ -199,6 +199,10 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 MyService.MyBinder binder = (MyService.MyBinder) iBinder;
                 service = binder.getService();
                 service.setCallbacks(ActivityMain.this);
+                if (!service.problem.equals("")) {
+                    handleProblem(service.problem);
+                    service.problem = "";
+                }
 
                 if (service.playing) {
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
@@ -413,6 +417,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     public void handleProblem(String message) {
         Log.d(Dry.TAG, "in activity handleProblem");
         Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
+        btnStartStop.setText(getResources().getString(R.string.btnStart));
         problemDialog.setArgs(message);
         problemDialog.show(getFragmentManager().beginTransaction(), "");
     }

@@ -26,6 +26,7 @@ public class MyService extends Service {
     HandlerThread handlerThread;
     String ext;
     ServiceCallbacks serviceCallbacks;
+    String problem;
 
     double rate;
     boolean playing;
@@ -41,6 +42,7 @@ public class MyService extends Service {
         mBinder = new MyBinder();
         playing = false;
         context = getApplicationContext();
+        problem = "";
 
         handlerThread = new HandlerThread("MyHandlerThread");
 
@@ -177,6 +179,8 @@ public class MyService extends Service {
         startActivity(new Intent(context, ActivityMain.class));
         if (serviceCallbacks != null) {
             serviceCallbacks.handleProblem(message);
+        } else {
+            problem = message;
         }
     }
 

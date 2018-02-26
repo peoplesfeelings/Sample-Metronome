@@ -126,16 +126,6 @@ public class AudioFiles {
         service.at.write(decodedBytes,0,decodedBytes.length);
         service.at.setPlaybackRate(outputformat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
 
-
-
-
-//        service.handleFileProblem("the test error string");
-//        return false;
-
-
-
-
-
         return true;
     }
 
