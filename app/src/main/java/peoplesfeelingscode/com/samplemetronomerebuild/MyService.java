@@ -19,15 +19,12 @@ public class MyService extends Service {
     final int ONGOING_NOTIFICATION_ID = 4345;
 
     AudioTrack at;
-
     IBinder mBinder;
-
     Notification notification;
     Context context;
-
     HandlerThread handlerThread;
-
     String ext;
+    ServiceCallbacks serviceCallbacks;
 
     double rate;
     boolean playing;
@@ -65,6 +62,10 @@ public class MyService extends Service {
         super.onDestroy();
 
         Log.d(Dry.TAG, "service ondestroy");
+    }
+
+    void setCallbacks(ServiceCallbacks callbacks) {
+        serviceCallbacks = callbacks;
     }
 
     void start() {
@@ -165,6 +166,9 @@ public class MyService extends Service {
 
     void handleFileProblem(String message) {
         stop();
+        if (serviceCallbacks != null) {
+            serviceCallbacks.handleProblem(message);
+        }
     }
 
     void setInterval(double fta) {

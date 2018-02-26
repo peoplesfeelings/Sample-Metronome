@@ -50,7 +50,7 @@ import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
 import java.io.File;
 
-public class ActivityMain extends ActivityBase {
+public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
 
     int permissionCheck;
@@ -73,6 +73,7 @@ public class ActivityMain extends ActivityBase {
     ArrayAdapter<String> spinnerAdapter;
 
     FragmentMainActivityWelcome welcomeDialog;
+    FragmentMainActivityProblem problemDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +95,7 @@ public class ActivityMain extends ActivityBase {
         editor = sharedPrefs.edit();
 
         welcomeDialog = new FragmentMainActivityWelcome();
+        problemDialog = new FragmentMainActivityProblem();
 
         checkIfFirstRun();
 
@@ -183,6 +185,7 @@ public class ActivityMain extends ActivityBase {
 
     void doUnbindService() {
         if (bound) {
+            service.setCallbacks(null);
             unbindService(connection);
             bound = false;
         }
@@ -194,6 +197,7 @@ public class ActivityMain extends ActivityBase {
             public void onServiceConnected(ComponentName className, IBinder iBinder) {
                 MyService.MyBinder binder = (MyService.MyBinder) iBinder;
                 service = binder.getService();
+                service.setCallbacks(ActivityMain.this);
 
                 if (service.playing) {
                     btnStartStop.setText(getResources().getString(R.string.btnStop));
@@ -402,5 +406,11 @@ public class ActivityMain extends ActivityBase {
             Storage.writeNoMediaFile(this);
 
         }
+    }
+
+    @Override
+    public void handleProblem(String message) {
+        problemDialog.setArgs(message);
+        problemDialog.show(getFragmentManager().beginTransaction(), "");
     }
 }

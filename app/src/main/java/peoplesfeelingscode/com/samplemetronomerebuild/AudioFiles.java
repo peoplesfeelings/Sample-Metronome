@@ -126,7 +126,17 @@ public class AudioFiles {
         service.at.write(decodedBytes,0,decodedBytes.length);
         service.at.setPlaybackRate(outputformat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
 
-        return true;
+
+
+
+        service.handleFileProblem("the test error string");
+        return false;
+
+
+
+
+
+//        return true;
     }
 
     //////////////// mp3 stuff /////////////////
