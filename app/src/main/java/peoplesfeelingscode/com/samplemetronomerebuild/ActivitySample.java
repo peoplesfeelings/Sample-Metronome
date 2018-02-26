@@ -24,6 +24,7 @@ package peoplesfeelingscode.com.samplemetronomerebuild;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -75,7 +76,8 @@ public class ActivitySample extends ActivityBase {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View viewClicked, int pos, long id) {
-                //
+                CheckBox chk = (CheckBox) viewClicked.findViewById(R.id.itemChkBx);
+                chk.performClick();
             }
         });
     }
