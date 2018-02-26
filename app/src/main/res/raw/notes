@@ -1,5 +1,4 @@
 to do
-    om click listener for sample screen list items
     update documentation
 
     check
@@ -38,98 +37,72 @@ audiotrack
 
 
 
-documentation [out of date]
+documentation
+    had to go with AudioTrack class because MediaPlayer and SoundPool introduce latency to timing of a tick being played
+        alternatives like exoplayer are bloated using them to get raw PCM is as much as work as just decoding files ourselves
+        decoding the audio files in order to feed AudioTrack raw PCM data means using the MediaCodec API
+            MediaCodec works best with the getInputBuffer/getOutputBuffer calls introduced in API 21, so that's the min
+        because we're decoding audio files ourselves we have to be careful about validating the files
+            so we need to be able to alert the user if a file is not usable for some reason
+            because it's desirable to allow user to change audio file selection while metronome is playing, loadFile can be initiated by user from main activity screen or sample screen
+                rather than feeding potential error message to either activity, we just bring main activity to top of stack and show user error dialog there
+                    main activity establishes connection to service in activity onstart using async serviceconnection callback so sometimes we have to stash the error message in the service for a moment then have main activity check if there is an error message stashed
     main activity
-        when main activity is created, it
-            checks if app has run before and, if not,
-                sets default settings
-                launches welcome dialog
-                makes directory and writes preliminary files
-            creates a seviceconnection instance with listeners
-                once connected,
+        onStart
+            checks if service is running, and if not, starts it
+            establishes connection to service
+                once connected
                     activity checks services looprunning bool to set button text accordingly
-                    dial is set up here because onmove and onup listeners call service's setinterval
-                    edittext is set up here because the textwatcher's aftertextchanged listener calls service's setinterval
-                    spinner is set up here because the spinner's setonitemclicklistener assigns the service's rate member and calls setinterval
+                    dial is set up because onmove and onup listeners call service's setinterval
+                    edittext is set up because the textwatcher's aftertextchanged listener calls service's setinterval
+                    spinner is set up because the spinner's setonitemclicklistener assigns the service's rate member and calls setinterval
                         also the setup method assigns the rate member the value loaded from shareprefs
                     listeners set up because start/stop button calls service methods start, stop, and setinterval
-            checks if service is running, and if not, starts it
-            binds to service using serviceconnection
-        start/stop button
-            checks if service is playing
-                may be playing if it was playing when the prior instance of activity was destroyed
-            calls setinterval because it may not have been called yet
-            calls service.start(), service.stop()
-            changes text
+                    activity gives service reference to activity instance so service can show problem dialog if needed
+        onstop
+            assigns null to service's reference to activity
+            unbinds
     service
         started when activity starts, if not started already
         stopped in activity's ondestroy, if bound and not playing
+            will play indefinitely in background
         foreground
             started in onstart, stopped in onstop
         when service starts
             instantiates myBinder which provides getter for reference to service instance
-            creates soundpool
-            loads file
-            sets up notification object to be used when turning on foreground
-        members
-            variables
-                lastTick
-                    used in
-                        loop()
-                    assigned in
-                        loop()
-                        oncreate
-                        setInterval
-                interval
-                    used in loop()
-                    assigned in setinterval()
-                startTime
-                    only assigned in setinterval
-                    used in loop()
-                loopRunning
-                    only set in start(), stop(), and initialized in oncreate
-            methods
-                loadFile()
-                    calls sounds.load()
-                loop()
-                    starts new thread
-                        checks if file needs to be loaded
-                            this may be true if loadfile has not been called yet
-                            calls loadFile if so
-                        assigns lastTick and calls sounds.play
-                        starts while loop
-                            checks if file needs to be loaded
-                                may be true if user selected different sample in sample activity
-                                calls loadFile if so
-                            if current time greater than lastTick + interval
-                                increment count
-                                assign lastTick as startTime + count * interval
-                                calls sounds.play
-                onstart()
-                    calls loop()
-                onstop()
-                    sets loopRunning to false
-                setinterval()
-                    called by
-                        dial listener
-                        edittext listener
-                        start/stop button listener
-                        spinner listener
-                    when setinterval() is called,
-                        the start time changes
-                        bpm is set from fta value
-                        interval is set as quotient of duration of beat over rate
-                    takes a double fta because app treats dial's "full texture angle" as central store of its position / the bpm
-    storage
-        convenient place for static members to be shared by components but not dependent on any / complicating life cycles
-            fileNeedsToBeLoaded
-                only set true in checkbox onclicklistener
-                only set false in loadFile()
-    diagram
-        1
-            https://drive.google.com/file/d/1I9zJuEpkjePmoJ-Cmkuff_toSS0uLj03/view?usp=sharing
-        2
-            https://drive.google.com/file/d/15RkGM2yxLSBOSa7fqDMVjZ_NewCASOQn/view?usp=sharing
+        loopRunning
+            only set in start(), stop(), and initialized in oncreate
+        looper
+            comes from handlerthread
+            posted to using a handler instance
+            the runnable is the thing that's run on it
+            the runnable posts itself to the looper using postAtTime() to queue up the next tick
+        the runnable
+            checks if file needs to be loaded and calls loadFile on main thread if needed
+            only plays audiotrack if fileNeedsToBeLoaded is false, in case file is being decoded and audiotrack is being initialized in main thread
+        fileNeedsToBeLoaded
+            initialized true in service oncreate
+            assigned true when user selects a different sample in sample screen
+            read only in looper runnable
+            only set false after successful file load
+        timing
+            done in setInterval() and in the looper runnable
+                using startTime, lastTick, count, and interval
+            setInterval may be called while loop is running, in which case startTime is changed
+            each tick is calculated relative to startTime, which is last time metronome was started or interval was changed
+        setinterval()
+            called by
+                start/stop button listener
+                dial onUp and onMove listeners
+                edittext listener
+                spinner listener
+            when setinterval() is called,
+                the start time changed if playing, otherwise set to -1, to be set when loop is started
+                bpm is set from fta value
+                interval is set as beat duration divided by rate
+        dial's "full texture angle" is central store of  the bpm
+    decoder workflow diagram
+        https://drive.google.com/file/d/15RkGM2yxLSBOSa7fqDMVjZ_NewCASOQn/view?usp=sharing
 
 
 

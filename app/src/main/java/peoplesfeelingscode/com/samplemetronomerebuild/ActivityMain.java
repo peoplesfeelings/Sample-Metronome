@@ -100,13 +100,9 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         checkIfFirstRun();
 
         setUpServiceConnection();
-        doBindService();
 
         getPermissionForWrite();
         checkForOldFolder();
-
-        Log.d(Dry.TAG, "activity oncreate");
-        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
     }
 
     @Override

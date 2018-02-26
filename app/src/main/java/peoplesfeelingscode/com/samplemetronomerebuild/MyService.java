@@ -49,22 +49,16 @@ public class MyService extends Service {
         Storage.fileNeedsToBeLoaded = true;
 
         setUpForeground();
-
-        Log.d(Dry.TAG, "service oncreate");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(Dry.TAG, "service onbind");
-
         return mBinder;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        Log.d(Dry.TAG, "service ondestroy");
     }
 
     void setCallbacks(ServiceCallbacks callbacks) {
@@ -72,16 +66,12 @@ public class MyService extends Service {
     }
 
     void start() {
-        Log.d(Dry.TAG, "in start()");
-        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
         handlerThread.start();
-        final Handler handler = new Handler(handlerThread.getLooper());
+        final Handler looperHandler = new Handler(handlerThread.getLooper());
 
-        handler.post(new Runnable() {
+        looperHandler.post(new Runnable() {
             @Override
             public void run() {
-                Log.d(Dry.TAG, "in handler thread");
-                Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
                 if (Storage.fileNeedsToBeLoaded) {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
@@ -108,7 +98,7 @@ public class MyService extends Service {
                     lastTick = startTime + (long) (count * interval);
                 }
 
-                handler.postAtTime(this, (long) (lastTick + interval));
+                looperHandler.postAtTime(this, (long) (lastTick + interval));
             }
         });
 
@@ -144,12 +134,9 @@ public class MyService extends Service {
     }
 
     void loadFile(String fileName) {
-        Log.d(Dry.TAG, "in loadFile()");
-        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
         if (at != null) {
             at.release();
         }
-        Log.d(Dry.TAG, "filename: " + fileName);
         boolean success;
         ext = FilenameUtils.getExtension(fileName);
 
@@ -166,8 +153,6 @@ public class MyService extends Service {
             default:
                 success = false;
         }
-
-        Log.d(Dry.TAG, "load success: " + success);
 
         if (success) {
             Storage.fileNeedsToBeLoaded = false;
