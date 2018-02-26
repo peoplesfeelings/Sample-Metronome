@@ -129,14 +129,14 @@ public class AudioFiles {
 
 
 
-        service.handleFileProblem("the test error string");
-        return false;
+//        service.handleFileProblem("the test error string");
+//        return false;
 
 
 
 
 
-//        return true;
+        return true;
     }
 
     //////////////// mp3 stuff /////////////////

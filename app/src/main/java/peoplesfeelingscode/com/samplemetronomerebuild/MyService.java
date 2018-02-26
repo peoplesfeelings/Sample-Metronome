@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -69,23 +70,32 @@ public class MyService extends Service {
     }
 
     void start() {
+        Log.d(Dry.TAG, "in start()");
+        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
         handlerThread.start();
         final Handler handler = new Handler(handlerThread.getLooper());
 
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Log.d(Dry.TAG, "in handler thread");
+                Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
                 if (Storage.fileNeedsToBeLoaded) {
-                    if (!loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context))) {
-                        return;
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, context));
+                        }
+                    });
+                }
+
+                if (!Storage.fileNeedsToBeLoaded) {
+                    if (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+                        at.stop();
                     }
-                }
 
-                if (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-                    at.stop();
+                    at.play();
                 }
-
-                at.play();
 
                 if (startTime == -1) {
                     startTime = SystemClock.uptimeMillis();
@@ -131,7 +141,9 @@ public class MyService extends Service {
                         .build();
     }
 
-    boolean loadFile(String fileName) {
+    void loadFile(String fileName) {
+        Log.d(Dry.TAG, "in loadFile()");
+        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
         if (at != null) {
             at.release();
         }
@@ -157,15 +169,12 @@ public class MyService extends Service {
 
         if (success) {
             Storage.fileNeedsToBeLoaded = false;
-        } else {
-            return false;
         }
-
-        return true;
     }
 
     void handleFileProblem(String message) {
         stop();
+        startActivity(new Intent(context, ActivityMain.class));
         if (serviceCallbacks != null) {
             serviceCallbacks.handleProblem(message);
         }

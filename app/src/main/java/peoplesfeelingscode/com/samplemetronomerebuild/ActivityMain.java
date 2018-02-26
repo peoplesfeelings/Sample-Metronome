@@ -79,7 +79,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(Dry.TAG, "onCreate");
+        Log.d(Dry.TAG, "onCreate !!!!!!!!!!!!!!!!!!!");
 
         setContentView(R.layout.activity_main);
 
@@ -106,6 +106,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         checkForOldFolder();
 
         Log.d(Dry.TAG, "activity oncreate");
+        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
     }
 
     @Override
@@ -410,6 +411,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
     @Override
     public void handleProblem(String message) {
+        Log.d(Dry.TAG, "in activity handleProblem");
+        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
         problemDialog.setArgs(message);
         problemDialog.show(getFragmentManager().beginTransaction(), "");
     }
