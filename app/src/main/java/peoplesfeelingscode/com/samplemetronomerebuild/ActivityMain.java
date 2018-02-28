@@ -251,12 +251,20 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                         toast.show();
                         return;
                     }
-                    service.setInterval(hgDialV2.getFullTextureAngle());
-                    service.start();
-                    btnStartStop.setText(getResources().getString(R.string.btnStop));
+                    if (bound) {
+                        service.setInterval(hgDialV2.getFullTextureAngle());
+                        service.start();
+                        btnStartStop.setText(getResources().getString(R.string.btnStop));
+                    } else {
+                        doBindService();
+                    }
                 } else {
-                    btnStartStop.setText(getResources().getString(R.string.btnStart));
-                    service.stop();
+                    if (bound) {
+                        service.stop();
+                        btnStartStop.setText(getResources().getString(R.string.btnStart));
+                    } else {
+                        doBindService();
+                    }
                 }
             }
         });

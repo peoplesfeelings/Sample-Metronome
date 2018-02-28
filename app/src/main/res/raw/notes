@@ -2,7 +2,6 @@ to do
     update documentation
 
     check
-        if there are no files, does loadFile and start() fail gracefully
         handler.postattime works if time is missed
 
     test
@@ -103,6 +102,10 @@ documentation
                 bpm is set from fta value
                 interval is set as beat duration divided by rate
         dial's "full texture angle" is central store of the bpm
+        seleted file name
+            never set as empty
+            initialized on install
+            check for file.exists() done in start/stop button handler
     decoder workflow diagram
         https://drive.google.com/file/d/15RkGM2yxLSBOSa7fqDMVjZ_NewCASOQn/view?usp=sharing
 
