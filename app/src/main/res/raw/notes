@@ -38,8 +38,8 @@ audiotrack
 
 
 documentation
-    had to go with AudioTrack class because MediaPlayer and SoundPool introduce latency to timing of a tick being played
-        alternatives like exoplayer are bloated using them to get raw PCM is as much as work as just decoding files ourselves
+    had to go with AudioTrack class because MediaPlayer and SoundPool introduce latency to timing of individual ticks being played
+        alternatives like exoplayer are bloated. using them to get raw PCM is as much as work as just decoding files ourselves
         decoding the audio files in order to feed AudioTrack raw PCM data means using the MediaCodec API
             MediaCodec works best with the getInputBuffer/getOutputBuffer calls introduced in API 21, so that's the min
         because we're decoding audio files ourselves we have to be careful about validating the files
@@ -53,11 +53,11 @@ documentation
             establishes connection to service
                 once connected
                     activity checks services looprunning bool to set button text accordingly
-                    dial is set up because onmove and onup listeners call service's setinterval
-                    edittext is set up because the textwatcher's aftertextchanged listener calls service's setinterval
-                    spinner is set up because the spinner's setonitemclicklistener assigns the service's rate member and calls setinterval
+                    dial is set up here because onmove and onup listeners call service's setinterval
+                    edittext is set up here because the textwatcher's aftertextchanged listener calls service's setinterval
+                    spinner is set up here because the spinner's setonitemclicklistener assigns the service's rate member and calls setinterval
                         also the setup method assigns the rate member the value loaded from shareprefs
-                    listeners set up because start/stop button calls service methods start, stop, and setinterval
+                    listeners set up here because start/stop button calls service methods start, stop, and setinterval
                     activity gives service reference to activity instance so service can show problem dialog if needed
         onstop
             assigns null to service's reference to activity
@@ -67,7 +67,7 @@ documentation
         stopped in activity's ondestroy, if bound and not playing
             will play indefinitely in background
         foreground
-            started in onstart, stopped in onstop
+            started in start(), stopped in stop()
         when service starts
             instantiates myBinder which provides getter for reference to service instance
         loopRunning
@@ -79,6 +79,7 @@ documentation
             the runnable posts itself to the looper using postAtTime() to queue up the next tick
         the runnable
             checks if file needs to be loaded and calls loadFile on main thread if needed
+                so files can be changed while metronome is playing
             only plays audiotrack if fileNeedsToBeLoaded is false, in case file is being decoded and audiotrack is being initialized in main thread
         fileNeedsToBeLoaded
             initialized true in service oncreate
@@ -89,7 +90,9 @@ documentation
             done in setInterval() and in the looper runnable
                 using startTime, lastTick, count, and interval
             setInterval may be called while loop is running, in which case startTime is changed
-            each tick is calculated relative to startTime, which is last time metronome was started or interval was changed
+                this allows user to adjust dial while metronome is playing
+            each tick's timing is always calculated relative to the startTime, which is the last time the metronome was started or the interval was changed
+                this approach, as opposed to an iterative approach, cleanly eliminates potential timing inaccuracies from miscellanious factors that would cause the metronome to gradually veer astray from true tempo
         setinterval()
             called by
                 start/stop button listener
@@ -97,10 +100,10 @@ documentation
                 edittext listener
                 spinner listener
             when setinterval() is called,
-                the start time changed if playing, otherwise set to -1, to be set when loop is started
+                the start time is changed, if playing, otherwise set to -1, to be set when loop is started
                 bpm is set from fta value
                 interval is set as beat duration divided by rate
-        dial's "full texture angle" is central store of  the bpm
+        dial's "full texture angle" is central store of the bpm
     decoder workflow diagram
         https://drive.google.com/file/d/15RkGM2yxLSBOSa7fqDMVjZ_NewCASOQn/view?usp=sharing
 
