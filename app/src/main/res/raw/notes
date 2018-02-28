@@ -2,7 +2,6 @@ to do
     update documentation
 
     check
-        the wav parsing code assumes little endian...
         if there are no files, does loadFile and start() fail gracefully
         handler.postattime works if time is missed
 

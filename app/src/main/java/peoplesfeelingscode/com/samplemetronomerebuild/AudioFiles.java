@@ -25,6 +25,7 @@ public class AudioFiles {
     static final int[] SUPPORTED_BIT_DEPTHS = { 16 };
     static final int[] SUPPORTED_CHANNELS = { 1, 2 };
     static final int[] SUPPORTED_SAMPLE_RATES = { 44100, 48000 };
+    static final byte[] WAV_CHUNK_ID = { 'R', 'I', 'F', 'F', };
 
     //////////////// flac stuff /////////////////
 
@@ -233,7 +234,7 @@ public class AudioFiles {
 
     static boolean loadWav(String fileName, MyService service) {
         byte[] bytes;
-        AudioFileInfo info;
+        WavInfo info;
         InputStream ins;
 
         try {
@@ -242,6 +243,10 @@ public class AudioFiles {
                 info = AudioFiles.readWavHeader(ins);
                 bytes = AudioFiles.readWavPcm(info, ins);
 
+                if (!info.chunkId.equalsIgnoreCase("RIFF")) {
+                    service.handleFileProblem("Audio file not supported. " + "Atypical bit order.");
+                    return false;
+                }
                 if (info.format != 1) {
                     service.handleFileProblem("Audio file not supported. " + "Encoding must be PCM.");
                     return false;
@@ -284,20 +289,22 @@ public class AudioFiles {
         }
     }
 
-    static AudioFileInfo readWavHeader(InputStream wavStream) throws IOException, DecoderException {
+    static WavInfo readWavHeader(InputStream wavStream) throws IOException, DecoderException {
         ByteBuffer buffer = ByteBuffer.allocate(WAV_HEADER_SIZE);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
         wavStream.read(buffer.array(), buffer.arrayOffset(), buffer.capacity());
 
         buffer.rewind();
-        buffer.position(buffer.position() + 20);
+        byte[] chunkId = new byte[4];
+        buffer.get(chunkId, 0, 4);
+        String chunkString = new String(chunkId, "UTF-8");
+        buffer.position(buffer.position() + 16);
         int format = buffer.getShort();
         int channels = buffer.getShort();
         int rate = buffer.getInt();
         buffer.position(buffer.position() + 6);
         int depth = buffer.getShort();
-        int dataSize = 0;
         while (buffer.getInt() != 0x61746164) { // "data" marker
             Log.d(TAG, "Skipping non-data chunk");
             int size = buffer.getInt();
@@ -307,12 +314,12 @@ public class AudioFiles {
             wavStream.read(buffer.array(), buffer.arrayOffset(), 8);
             buffer.rewind();
         }
-        dataSize = buffer.getInt();
+        int dataSize = buffer.getInt();
 
-        return new AudioFileInfo(format, channels, rate, depth, dataSize);
+        return new WavInfo(chunkString, format, channels, rate, depth, dataSize);
     }
 
-    static byte[] readWavPcm(AudioFileInfo info, InputStream stream) throws IOException {
+    static byte[] readWavPcm(WavInfo info, InputStream stream) throws IOException {
         byte[] data = new byte[info.dataSize];
         stream.read(data, 0, data.length);
         return data;
