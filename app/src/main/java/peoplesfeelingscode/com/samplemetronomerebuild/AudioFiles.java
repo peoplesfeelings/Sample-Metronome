@@ -25,7 +25,8 @@ public class AudioFiles {
     static final int[] SUPPORTED_BIT_DEPTHS = { 16 };
     static final int[] SUPPORTED_CHANNELS = { 1, 2 };
     static final int[] SUPPORTED_SAMPLE_RATES = { 44100, 48000 };
-    static final byte[] WAV_CHUNK_ID = { 'R', 'I', 'F', 'F', };
+    static final int MAX_BYTES_LENTH = 1000000;
+
 
     //////////////// flac stuff /////////////////
 
@@ -44,8 +45,6 @@ public class AudioFiles {
         }
 
         sourceFormat = extractor.getTrackFormat(0);
-
-        Log.d(Dry.TAG, "source format: " + sourceFormat.toString());
 
         extractor.selectTrack(0);
 
@@ -97,6 +96,11 @@ public class AudioFiles {
 
                 for (int i = 0; i < outputBufferInfo.size; i++) {
                     byteArrayOutputStream.write(outputBuffer.get(i));
+                }
+
+                if (byteArrayOutputStream.size() > MAX_BYTES_LENTH) {
+                    service.handleFileProblem("Sample file too large.");
+                    return false;
                 }
 
                 decoder.releaseOutputBuffer(outputBufferIndex, false);
@@ -199,6 +203,11 @@ public class AudioFiles {
                     byteArrayOutputStream.write(outputBuffer.get(i));
                 }
 
+                if (byteArrayOutputStream.size() > MAX_BYTES_LENTH) {
+                    service.handleFileProblem("Sample file too large.");
+                    return false;
+                }
+
                 decoder.releaseOutputBuffer(outputBufferIndex, false);
 
                 if ((outputBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
@@ -265,6 +274,10 @@ public class AudioFiles {
                 }
                 if (info.dataSize <= 0) {
                     service.handleFileProblem("Audio file not supported. " + "Audio data missing.");
+                    return false;
+                }
+                if (info.dataSize > MAX_BYTES_LENTH) {
+                    service.handleFileProblem("Sample file too large.");
                     return false;
                 }
 

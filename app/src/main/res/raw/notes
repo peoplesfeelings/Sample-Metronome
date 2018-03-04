@@ -1,6 +1,4 @@
 to do
-    implement check for length, since not streaming pcm into audiotrack
-    prevent check box from being un checked if checked
 
     test
         induce lost serviceconncection and see
@@ -20,6 +18,9 @@ maybe do
     move fileNeedsToBeLoaded to Dry
     call at.release in onstop?
         would need to set fileNeedsToBeLoaded to true
+    replace WaveInfo with subclass of MediaFormat
+    consolidate similar code across format decoders/parsers
+    remove fileBeingLoaded initialization in service onCreate
 
 audiotrack
     https://android.googlesource.com/platform/frameworks/base/+/android-4.4_r1/media/java/android/media/AudioTrack.java
@@ -74,7 +75,11 @@ documentation
             initialized true in service oncreate
             assigned true when user selects a different sample in sample screen
             read only in looper runnable
-            only set false after successful file load
+            only set false after successful file load only to satisfy
+        fileBeingLoaded
+            assigned true at beginning of loadFile() and false at the end of loadFile()
+            checked, along with fileNeedsToBeLoaded, in looper runnable to decide if it should call loadFile
+            looper and loadFile() are on separate threads so, without this check, user loading file that's too large could cause loadFile() to be called multiple times
         timing
             done in setInterval() and in the looper runnable
                 done using startTime, lastTick, count, and interval

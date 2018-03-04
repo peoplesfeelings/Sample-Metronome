@@ -126,8 +126,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         if (bound && !service.playing) {
             stopService(new Intent(this, MyService.class));
         }
-
-        Log.d(Dry.TAG, "activity ondestroy");
     }
 
     @Override
@@ -208,16 +206,12 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 setUpEditText();
                 setUpSpinner();
                 setUpListeners();
-
-                Log.d(Dry.TAG, "serviceconnection connected");
             }
 
             @Override
             public void onServiceDisconnected(ComponentName arg0) {
                 service = null;
                 bound = false;
-
-                Log.d(Dry.TAG, "serviceconnection disconnected");
             }
         };
     }
@@ -417,9 +411,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
     }
 
-    @Override
     public void handleProblem(String message) {
-        Log.d(Dry.TAG, "in activity handleProblem");
         Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
         btnStartStop.setText(getResources().getString(R.string.btnStart));
         problemDialog.setArgs(message);

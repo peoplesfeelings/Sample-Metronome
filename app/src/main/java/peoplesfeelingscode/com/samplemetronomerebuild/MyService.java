@@ -12,7 +12,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -34,6 +33,7 @@ public class MyService extends Service {
     long lastTick;
     int count = 0;
     double interval;
+    boolean fileBeingLoaded;
 
     @Override
     public void onCreate() {
@@ -41,6 +41,7 @@ public class MyService extends Service {
 
         mBinder = new MyBinder();
         playing = false;
+        fileBeingLoaded = false;
         context = getApplicationContext();
         problem = "";
 
@@ -72,7 +73,7 @@ public class MyService extends Service {
         looperHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (Storage.fileNeedsToBeLoaded) {
+                if (Storage.fileNeedsToBeLoaded && !fileBeingLoaded) {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
@@ -104,8 +105,6 @@ public class MyService extends Service {
 
         startForeground(ONGOING_NOTIFICATION_ID, notification);
         playing = true;
-
-        Log.d(Dry.TAG, "service - start");
     }
 
     void stop() {
@@ -113,8 +112,6 @@ public class MyService extends Service {
         handlerThread = new HandlerThread("MyHandlerThread");
         stopForeground(true);
         playing = false;
-
-        Log.d(Dry.TAG, "service - stop");
     }
 
     void setUpForeground() {
@@ -134,6 +131,8 @@ public class MyService extends Service {
     }
 
     void loadFile(String fileName) {
+        fileBeingLoaded = true;
+
         if (at != null) {
             at.release();
         }
@@ -157,6 +156,8 @@ public class MyService extends Service {
         if (success) {
             Storage.fileNeedsToBeLoaded = false;
         }
+
+        fileBeingLoaded = false;
     }
 
     void handleFileProblem(String message) {
