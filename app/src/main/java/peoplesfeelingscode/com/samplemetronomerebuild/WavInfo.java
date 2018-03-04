@@ -7,7 +7,7 @@ public class WavInfo {
     int rate;
     int depth; // 16, 24, etc
     int dataSize;
-    String chunkId;
+    String chunkId; // RIFF, RIFX
 
     public WavInfo(String chunkId, int format, int channels, int rate, int depth, int dataSize ) {
         this.chunkId = chunkId;
