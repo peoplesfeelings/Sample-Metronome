@@ -75,6 +75,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     FragmentMainActivityWelcome welcomeDialog;
     FragmentMainActivityProblem problemDialog;
 
+    boolean dialBeingPressed;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +86,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         setContentView(R.layout.activity_main);
 
         bound = false;
+        dialBeingPressed = false;
 
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
@@ -322,15 +325,21 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                String input = txtBpm.getText().toString();
-                if (input.length() > 0 && !input.equals(".")) {
-                    double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
-                    hgDialV2.doRapidDial(fta);
-                    hgDialV2.doManualGestureDial(fta);
-                    service.setInterval(hgDialV2.getFullTextureAngle());
-                    service.stop();
-                    btnStartStop.setText(getResources().getString(R.string.btnStart));
-                    Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
+                if (!dialBeingPressed) {
+                    String input = txtBpm.getText().toString();
+                    if (input.length() > 0 && !input.equals(".")) {
+                        double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
+
+                        hgDialV2.doRapidDial(fta);
+                        hgDialV2.doManualGestureDial(fta);
+
+                        service.setInterval(hgDialV2.getFullTextureAngle());
+                        service.stop();
+
+                        btnStartStop.setText(getResources().getString(R.string.btnStart));
+
+                        Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
+                    }
                 }
             }
         };
@@ -341,7 +350,9 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     void setUpDial() {
         ihgDial = new HGDialV2.IHGDial() {
             @Override
-            public void onDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
+            public void onDown(HGDialInfo hgDialInfo) {
+                dialBeingPressed = true;
+            }
             @Override
             public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
@@ -360,12 +371,12 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 service.setInterval(fta);
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
+
+                dialBeingPressed = false;
             }
         };
 
         hgDialV2.registerCallback(ihgDial);
-        hgDialV2.setFlingTolerance(100, 500);
-        hgDialV2.setSpinAnimation(0,0,4000);
 
         loadStoredAngle();
     }
