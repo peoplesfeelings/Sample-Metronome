@@ -1,8 +1,6 @@
 to do
+    check for unneeded libraries
 
-    test
-        induce lost serviceconncection and see
-            if service keeps running after activity is destroyed (when not playing)
     about
         precision blurb
         apache commons io

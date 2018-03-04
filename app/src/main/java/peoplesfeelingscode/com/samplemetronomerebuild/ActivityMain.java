@@ -328,6 +328,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                     hgDialV2.doRapidDial(fta);
                     hgDialV2.doManualGestureDial(fta);
                     service.setInterval(hgDialV2.getFullTextureAngle());
+                    service.stop();
+                    btnStartStop.setText(getResources().getString(R.string.btnStart));
                     Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                 }
             }
