@@ -194,7 +194,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 service = binder.getService();
                 service.setCallbacks(ActivityMain.this);
                 if (!service.problem.equals("")) {
-                    handleProblem(service.problem);
+                    showProblemInfo(service.problem);
                     service.problem = "";
                 }
 
@@ -413,9 +413,9 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
     }
 
-    public void handleProblem(String message) {
-        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
+    public void showProblemInfo(String message) {
         btnStartStop.setText(getResources().getString(R.string.btnStart));
+        
         problemDialog.setArgs(message);
         problemDialog.show(getFragmentManager().beginTransaction(), "");
     }

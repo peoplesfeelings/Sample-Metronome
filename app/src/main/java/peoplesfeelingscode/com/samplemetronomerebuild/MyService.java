@@ -164,7 +164,7 @@ public class MyService extends Service {
         stop();
         startActivity(new Intent(context, ActivityMain.class));
         if (serviceCallbacks != null) {
-            serviceCallbacks.handleProblem(message);
+            serviceCallbacks.showProblemInfo(message);
         } else {
             problem = message;
         }

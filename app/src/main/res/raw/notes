@@ -117,6 +117,7 @@ documentation
 
 ########################## snippets i may never need ##########################
 
+        Log.d(Dry.TAG, "THREAD: " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
 
 
         if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
