@@ -140,6 +140,7 @@ public class Storage {
             fos.close();
         } catch (Exception e) {
             Log.d(Dry.TAG, "error3");
+            Log.d(Dry.TAG, e.getMessage());
         }
     }
 

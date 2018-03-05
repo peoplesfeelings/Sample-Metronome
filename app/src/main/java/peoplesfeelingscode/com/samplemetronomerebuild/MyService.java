@@ -162,7 +162,9 @@ public class MyService extends Service {
 
     void handleFileProblem(String message) {
         stop();
-        startActivity(new Intent(context, ActivityMain.class));
+        Intent intent = new Intent(context, ActivityMain.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
         if (serviceCallbacks != null) {
             serviceCallbacks.showProblemInfo(message);
         } else {
