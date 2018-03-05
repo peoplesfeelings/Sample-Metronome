@@ -55,7 +55,7 @@ public class Storage {
     static final int DEFAULT_SHARED_PREF_FLOAT = -1;
     static final int DEFAULT_SHARED_PREF_DOUBLE = -1;
     static final String DEFAULT_SHARED_PREF_STRING = "";
-    static final String DEFAULT_SELECTED_FILE_STRING = "guitar_hit_5.flac";
+    static final String DEFAULT_SELECTED_FILE_STRING = "guitar_hit_5.wav";
 
     static final String SHARED_PREF_HAS_RUN_KEY = "app has run before";
     static final String SHARED_PREF_FTA_KEY = "full texture angle";
@@ -73,13 +73,13 @@ public class Storage {
     static boolean fileNeedsToBeLoaded;
 
     static Pair[] samplePack = {
-            new Pair(R.raw.guitar_hit_1, "guitar_hit_1.flac"),
-            new Pair(R.raw.guitar_hit_2, "guitar_hit_2.flac"),
-            new Pair(R.raw.guitar_hit_3, "guitar_hit_3.flac"),
-            new Pair(R.raw.guitar_hit_4, "guitar_hit_4.flac"),
-            new Pair(R.raw.guitar_hit_5, "guitar_hit_5.flac"),
-            new Pair(R.raw.guitar_hit_6, "guitar_hit_6.flac"),
-            new Pair(R.raw.guitar_hit_7, "guitar_hit_7.flac"),
+            new Pair(R.raw.guitar_hit_1, "guitar_hit_1.wav"),
+            new Pair(R.raw.guitar_hit_2, "guitar_hit_2.wav"),
+            new Pair(R.raw.guitar_hit_3, "guitar_hit_3.wav"),
+            new Pair(R.raw.guitar_hit_4, "guitar_hit_4.wav"),
+            new Pair(R.raw.guitar_hit_5, "guitar_hit_5.wav"),
+            new Pair(R.raw.guitar_hit_6, "guitar_hit_6.wav"),
+            new Pair(R.raw.guitar_hit_7, "guitar_hit_7.wav"),
     };
 
     //////////////// write stuff /////////////////
