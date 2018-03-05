@@ -53,14 +53,6 @@
                 android:padding="@dimen/border_box_padding_and_margin" />
 
             <TextView
-                android:text="@string/txtRepo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/border_box"
-                android:layout_margin="@dimen/border_box_padding_and_margin"
-                android:padding="@dimen/border_box_padding_and_margin"/>
-
-            <TextView
                 android:text="@string/txtAcknowledgements"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
