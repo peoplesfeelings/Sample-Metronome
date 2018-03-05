@@ -75,7 +75,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     FragmentMainActivityWelcome welcomeDialog;
     FragmentMainActivityProblem problemDialog;
 
-    boolean dialBeingPressed;
+    boolean dontStop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +86,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         setContentView(R.layout.activity_main);
 
         bound = false;
-        dialBeingPressed = false;
+        dontStop = false;
 
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
@@ -325,7 +325,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (!dialBeingPressed) {
+                if (!dontStop) {
                     String input = txtBpm.getText().toString();
                     if (input.length() > 0 && !input.equals(".")) {
                         double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
@@ -348,10 +348,12 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     }
 
     void setUpDial() {
+        dontStop = true;
+
         ihgDial = new HGDialV2.IHGDial() {
             @Override
             public void onDown(HGDialInfo hgDialInfo) {
-                dialBeingPressed = true;
+                dontStop = true;
             }
             @Override
             public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -372,13 +374,15 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
 
-                dialBeingPressed = false;
+                dontStop = false;
             }
         };
 
         hgDialV2.registerCallback(ihgDial);
 
         loadStoredAngle();
+
+        dontStop = false;
     }
 
     double preventNegative(double fta) {

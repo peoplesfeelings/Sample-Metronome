@@ -1,5 +1,5 @@
 to do
-    check for unneeded libraries
+    fix activity starting triggering stop()
 
 store listing
     precision
