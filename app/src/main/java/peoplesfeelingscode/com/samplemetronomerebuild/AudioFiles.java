@@ -52,7 +52,7 @@ public class AudioFiles {
             decoder = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_FLAC);
         } catch (Exception e) {
             service.handleFileProblem("Failed to instantiate FLAC MediaCodec.");
-            Log.d(Dry.TAG, e.getMessage());
+            Log.d(Dry.TAG, "e.getMessage(): " + e.getMessage());
             return false;
         }
 

@@ -136,11 +136,12 @@ public class Storage {
     static void writeNoMediaFile(Activity activity) {
         try {
             FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", ".nomedia"));
-            fos.write(null);
+            fos.write(0);
             fos.close();
         } catch (Exception e) {
             Log.d(Dry.TAG, "error3");
-            Log.d(Dry.TAG, e.getMessage());
+            Log.d(Dry.TAG, "e.getMessage(): " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
