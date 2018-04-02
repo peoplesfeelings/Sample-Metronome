@@ -32,6 +32,6 @@
     <string name="txtFileTypes">Currently supported filetypes: FLAC, MP3, WAV. Please email peoplesfeelingscode@gmail.com if you have a need for support of another filetype.</string>
     <string name="txtRateLabel">Rate:</string>
     <string name="txtRepo">View the source code or contribute at:\n\nhttps://bitbucket.org/Peoples_Feelings_Code/precise-sample-metronome</string>
-    <string name="txtPreLicense">Sample Metronome version 1.6\nCopyright (c) 2017 People\'s Feelings\nLicensed under the Apache License version 2.0\nContact: peoplesfeelingscode@gmail.com</string>
+    <string name="txtPreLicense">Sample Metronome version 1.7\nCopyright (c) 2017 People\'s Feelings\nLicensed under the Apache License version 2.0\nContact: peoplesfeelingscode@gmail.com</string>
     <string name="txtServiceDescription">Sample Metronome player</string>
 </resources>
