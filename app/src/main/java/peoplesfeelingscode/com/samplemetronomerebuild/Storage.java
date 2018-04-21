@@ -30,9 +30,7 @@ import android.util.Pair;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +55,8 @@ public class Storage {
     static final String DEFAULT_SHARED_PREF_STRING = "";
     static final String DEFAULT_SELECTED_FILE_STRING = "guitar_hit_5.wav";
 
-    static final String SHARED_PREF_HAS_RUN_KEY = "app has run before";
+    static final String SHARED_PREF_VERSION_1_WAS_SET_UP_KEY = "app has run before";
+    static final String SHARED_PREF_LAST_VERSION_SET_UP = "last version set up";
     static final String SHARED_PREF_FTA_KEY = "full texture angle";
     static final String SHARED_PREF_RATE_KEY = "rate";
     static final String SHARED_PREF_SELECTED_FILE_KEY = "selected file";
@@ -83,40 +82,6 @@ public class Storage {
     };
 
     //////////////// write stuff /////////////////
-
-    static void copyOldToNew() {
-        ArrayList<ObjectFile> files = getFileList(oldPath);
-        int aSize = files.size();
-        InputStream inp;
-        ByteArrayOutputStream outputStream;
-        FileOutputStream fos;
-        for (int i = 0; i < aSize; i++) {
-            try {
-                inp = new FileInputStream(new File(oldPath, files.get(i).name));
-                outputStream = new ByteArrayOutputStream();
-                int size = 0;
-                byte[] buffer = new byte[1024];
-                while((size=inp.read(buffer,0,1024))>=0){
-                    outputStream.write(buffer,0,size);
-                }
-                inp.close();
-                buffer=outputStream.toByteArray();
-                fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", files.get(i).name));
-                fos.write(buffer);
-                fos.close();
-            } catch (IOException e) {
-                Log.d(Dry.TAG, "error moving files[" + i + "]");
-            }
-        }
-    }
-
-    static void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles())
-                deleteRecursive(child);
-
-        fileOrDirectory.delete();
-    }
 
     static void makeDirectoryIfNeeded() {
         try {
@@ -145,7 +110,7 @@ public class Storage {
         }
     }
 
-    static void writeSamplePack(Activity activity) {
+    static void writeSamplePack(Activity activity, int lastVersionCodeSetUp, int currentVersion) {
 
         for (int i = 0; i < samplePack.length; i++) {
             InputStream ins = activity.getResources().openRawResource((int) samplePack[i].first);

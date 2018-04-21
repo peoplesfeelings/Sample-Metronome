@@ -100,12 +100,9 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         welcomeDialog = new FragmentMainActivityWelcome();
         problemDialog = new FragmentMainActivityProblem();
 
-        checkIfFirstRun();
-
         setUpServiceConnection();
 
         getPermissionForWrite();
-        checkForOldFolder();
     }
 
     @Override
@@ -136,9 +133,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Storage.makeDirectoryIfNeeded();
-                    Storage.writeSamplePack(this);
-                    Storage.writeNoMediaFile(this);
+                    versionSetUp();
                     if (bound) {
                         service.loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
                     }
@@ -157,15 +152,63 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
     }
 
-    void checkForOldFolder() {
-        if (Storage.oldPath.exists()) {
-            Storage.makeDirectoryIfNeeded();
-            Storage.copyOldToNew();
-            Storage.writeNoMediaFile(this);
-            Storage.deleteRecursive(Storage.oldPath);
-        } else {
+    void getPermissionForWrite() {
+        permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
+        } else {
+            versionSetUp();
         }
+    }
+
+    void versionSetUp() {
+        int lastVersionSetUp = getLastVersionSetUp();
+        Log.d(Dry.TAG, "lastVersionSetUp: " + lastVersionSetUp);
+        int currentVersion = BuildConfig.VERSION_CODE;
+        Log.d(Dry.TAG, "currentVersion: " + currentVersion);
+
+        if (currentVersion > lastVersionSetUp) {
+            switch (lastVersionSetUp) {
+                case 0:
+                    setDefaultSettings();
+                    setUpDirectory();
+                    welcomeDialog.show(getFragmentManager().beginTransaction(), "");
+                default:
+                    Storage.writeSamplePack(this, lastVersionSetUp, currentVersion);
+                    Storage.setSharedPrefInt(currentVersion, Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
+            }
+        }
+    }
+
+    int getLastVersionSetUp() {
+        boolean hasRunBefore = Storage.getSharedPrefBool(Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
+        int lastVersionSetUp = Storage.getSharedPrefInt(Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
+
+        if (lastVersionSetUp == Storage.DEFAULT_SHARED_PREF_INT) {
+            if (hasRunBefore) {
+                /* 8 is last before version-check was implemented */
+                lastVersionSetUp = 8;
+            } else {
+                lastVersionSetUp = 0;
+            }
+        }
+
+        return lastVersionSetUp;
+    }
+
+    void setUpDirectory() {
+        Storage.makeDirectoryIfNeeded();
+        Storage.writeNoMediaFile(this);
+    }
+
+    void setDefaultSettings() {
+        //set default settings
+        Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
+        Storage.setSharedPrefInt(Storage.DEFAULT_RATE, Storage.SHARED_PREF_RATE_KEY, this);
+        Storage.setSharedPrefString(Storage.DEFAULT_SELECTED_FILE_STRING, Storage.SHARED_PREF_SELECTED_FILE_KEY, this);
+
+        Storage.setSharedPref(true, Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
     }
 
     void doBindService() {
@@ -217,19 +260,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 bound = false;
             }
         };
-    }
-
-    void getPermissionForWrite() {
-        permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
-        } else {
-            //
-        }
     }
 
     void setUpListeners() {
@@ -406,25 +436,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         hgDialV2.doRapidDial(fta);
         hgDialV2.doManualGestureDial(fta);
-    }
-
-    void checkIfFirstRun() {
-        boolean hasRunBefore = Storage.getSharedPrefBool(Storage.SHARED_PREF_HAS_RUN_KEY, this);
-
-        if (!hasRunBefore) {
-            //set default settings
-            Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
-            Storage.setSharedPrefInt(Storage.DEFAULT_RATE, Storage.SHARED_PREF_RATE_KEY, this);
-            Storage.setSharedPrefString(Storage.DEFAULT_SELECTED_FILE_STRING, Storage.SHARED_PREF_SELECTED_FILE_KEY, this);
-
-            Storage.setSharedPref(true, Storage.SHARED_PREF_HAS_RUN_KEY, this);
-
-            welcomeDialog.show(getFragmentManager().beginTransaction(), "");
-
-            Storage.makeDirectoryIfNeeded();
-            Storage.writeSamplePack(this);
-            Storage.writeNoMediaFile(this);
-        }
     }
 
     public void showProblemInfo(String message) {
