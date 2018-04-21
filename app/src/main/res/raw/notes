@@ -23,7 +23,7 @@ documentation
     had to go with AudioTrack class because MediaPlayer and SoundPool introduce latency to timing of individual ticks being played
         alternatives like exoplayer are bloated. using them to get raw PCM is as much as work as just decoding files ourselves
         decoding the audio files in order to feed AudioTrack raw PCM data means using the MediaCodec API
-            MediaCodec works best with the getInputBuffer/getOutputBuffer calls introduced in API 21, so that's the min
+            MediaCodec works best with the getInputBuffer/getOutputBuffer calls introduced in API 21, so that's the min API level
         because we're decoding audio files ourselves we have to be careful about validating the files
             so we need to be able to alert the user if a file is not usable for some reason
             because it's desirable to allow user to change audio file selection while metronome is playing, loadFile() can be initiated by user from main activity screen or sample screen
@@ -67,7 +67,7 @@ documentation
             initialized true in service oncreate
             assigned true when user selects a different sample in sample screen
             read only in looper runnable
-            only set false after successful file load only to satisfy
+            only set false after successful file load
         fileBeingLoaded
             assigned true at beginning of loadFile() and false at the end of loadFile()
             checked, along with fileNeedsToBeLoaded, in looper runnable to decide if it should call loadFile
@@ -78,7 +78,7 @@ documentation
             setInterval may be called while loop is running, in which case startTime is changed
                 this allows user to adjust dial while metronome is playing
             each tick's timing is always calculated relative to the startTime, which is the last time the metronome was started or the interval was changed
-                this approach, as opposed to an iterative approach, cleanly eliminates potential timing inaccuracies from miscellanious factors that would cause the metronome to veer astray from perfect tempo
+                this approach, as opposed to a recurring timer, cleanly eliminates many possible sources of timing inaccuracy
         setinterval()
             called by
                 start/stop button listener

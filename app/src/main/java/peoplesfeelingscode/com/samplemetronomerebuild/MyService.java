@@ -85,15 +85,11 @@ public class MyService extends Service {
                     });
                 }
 
-                Log.d(Dry.TAG, "runnable run");
-
                 if (!Storage.fileNeedsToBeLoaded) {
                     if (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-                        Log.d(Dry.TAG, "runnable in (at.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)");
                         at.stop();
                         at.reloadStaticData();
                     }
-                    Log.d(Dry.TAG, "runnable in (!Storage.fileNeedsToBeLoaded)");
 
                     at.play();
                 }

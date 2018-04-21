@@ -424,7 +424,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             Storage.makeDirectoryIfNeeded();
             Storage.writeSamplePack(this);
             Storage.writeNoMediaFile(this);
-
         }
     }
 
