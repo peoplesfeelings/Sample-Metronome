@@ -44,6 +44,12 @@ documentation
         onStop
             assigns null to service's reference to activity
             unbinds
+        versionSetUp
+            called in onRequestPermissionsResult() and getPermissionForWrite()
+                because it's where we write samples so we need write permission
+            the requirements that led to this are:
+                developer can include new samples in new app version
+                when user's app is updated, only new samples are written (deleted samples won't be written again)
     service
         audio player kept in service so screen can sleep and player wont be destroyed
         started when activity starts, if not started already

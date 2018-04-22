@@ -164,9 +164,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
     void versionSetUp() {
         int lastVersionSetUp = getLastVersionSetUp();
-        Log.d(Dry.TAG, "lastVersionSetUp: " + lastVersionSetUp);
         int currentVersion = BuildConfig.VERSION_CODE;
-        Log.d(Dry.TAG, "currentVersion: " + currentVersion);
 
         if (currentVersion > lastVersionSetUp) {
             switch (lastVersionSetUp) {
@@ -326,7 +324,13 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
 
-        rateSpinner.setSelection(Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this));
+        int storedRate = Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this);
+        /* after first install, ui set-up methods run before versionSetUp runs */
+        if (storedRate == Storage.DEFAULT_SHARED_PREF_INT) {
+            storedRate = Storage.DEFAULT_RATE;
+        }
+
+        rateSpinner.setSelection(storedRate);
         service.rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
     }
 
@@ -428,7 +432,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     void loadStoredAngle() {
         double fta = Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this);
 
-        if (fta == -1) {
+        /* after first install, ui set-up methods run before versionSetUp runs */
+        if (fta == Storage.DEFAULT_SHARED_PREF_INT) {
             fta = Storage.bpmToFta(Storage.DEFAULT_BPM);
         }
 
