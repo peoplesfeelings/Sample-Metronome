@@ -50,6 +50,8 @@ documentation
             the requirements that led to this are:
                 developer can include new samples in new app version
                 when user's app is updated, only new samples are written (deleted samples won't be written again)
+                samples we don't like anymore can be removed and they won't be written to new installers
+                    but will remain for people who have them already
     service
         audio player kept in service so screen can sleep and player wont be destroyed
         started when activity starts, if not started already

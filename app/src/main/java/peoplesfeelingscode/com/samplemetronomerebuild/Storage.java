@@ -64,13 +64,10 @@ public class Storage {
     static boolean fileNeedsToBeLoaded;
 
     static Sample[] samplePack = {
-            new Sample(8, R.raw.guitar_hit_1, "guitar_hit_1.wav"),
-            new Sample(8, R.raw.guitar_hit_2, "guitar_hit_2.wav"),
-            new Sample(8, R.raw.guitar_hit_3, "guitar_hit_3.wav"),
-            new Sample(8, R.raw.guitar_hit_4, "guitar_hit_4.wav"),
             new Sample(8, R.raw.guitar_hit_5, "guitar_hit_5.wav"),
-            new Sample(8, R.raw.guitar_hit_6, "guitar_hit_6.wav"),
-            new Sample(8, R.raw.guitar_hit_7, "guitar_hit_7.wav"),
+            new Sample(9, R.raw.window, "window.wav"),
+            new Sample(9, R.raw.thing, "thing.wav"),
+            new Sample(9, R.raw.wood_beam, "wood_beam.wav"),
     };
 
     //////////////// write stuff /////////////////
