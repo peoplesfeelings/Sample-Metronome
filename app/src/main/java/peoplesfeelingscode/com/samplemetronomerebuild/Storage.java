@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
-import android.util.Pair;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -37,13 +36,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class Storage {
-    private static final String RIFF_HEADER = "RIFF";
-    private static final String WAVE_HEADER = "WAVE";
-    private static final String FMT_HEADER = "fmt ";
-    private static final String DATA_HEADER = "data";
-
-
-    private static final String CHARSET = "ASCII";
 
     static final double SENSITIVITY_FACTOR = 9.0;
 
@@ -71,14 +63,14 @@ public class Storage {
 
     static boolean fileNeedsToBeLoaded;
 
-    static Pair[] samplePack = {
-            new Pair(R.raw.guitar_hit_1, "guitar_hit_1.wav"),
-            new Pair(R.raw.guitar_hit_2, "guitar_hit_2.wav"),
-            new Pair(R.raw.guitar_hit_3, "guitar_hit_3.wav"),
-            new Pair(R.raw.guitar_hit_4, "guitar_hit_4.wav"),
-            new Pair(R.raw.guitar_hit_5, "guitar_hit_5.wav"),
-            new Pair(R.raw.guitar_hit_6, "guitar_hit_6.wav"),
-            new Pair(R.raw.guitar_hit_7, "guitar_hit_7.wav"),
+    static Sample[] samplePack = {
+            new Sample(8, R.raw.guitar_hit_1, "guitar_hit_1.wav"),
+            new Sample(8, R.raw.guitar_hit_2, "guitar_hit_2.wav"),
+            new Sample(8, R.raw.guitar_hit_3, "guitar_hit_3.wav"),
+            new Sample(8, R.raw.guitar_hit_4, "guitar_hit_4.wav"),
+            new Sample(8, R.raw.guitar_hit_5, "guitar_hit_5.wav"),
+            new Sample(8, R.raw.guitar_hit_6, "guitar_hit_6.wav"),
+            new Sample(8, R.raw.guitar_hit_7, "guitar_hit_7.wav"),
     };
 
     //////////////// write stuff /////////////////
@@ -110,29 +102,30 @@ public class Storage {
         }
     }
 
-    static void writeSamplePack(Activity activity, int lastVersionCodeSetUp, int currentVersion) {
-
+    static void writeSamplePack(Activity activity, int lastVersionCodeSetUp) {
         for (int i = 0; i < samplePack.length; i++) {
-            InputStream ins = activity.getResources().openRawResource((int) samplePack[i].first);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            int size = 0;
+            if (samplePack[i].versionIntroduced > lastVersionCodeSetUp) {
+                InputStream ins = activity.getResources().openRawResource(samplePack[i].rawResource);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                int size = 0;
 
-            byte[] buffer = new byte[1024];
-            try {
-                while((size=ins.read(buffer,0,1024))>=0){
-                    outputStream.write(buffer,0,size);
+                byte[] buffer = new byte[1024];
+                try {
+                    while((size=ins.read(buffer,0,1024))>=0){
+                        outputStream.write(buffer,0,size);
+                    }
+                    ins.close();
+                } catch (Exception e) {
+                    Log.d(Dry.TAG, "error");
                 }
-                ins.close();
-            } catch (Exception e) {
-                Log.d(Dry.TAG, "error");
-            }
-            buffer=outputStream.toByteArray();
-            try {
-                FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", (String) samplePack[i].second));
-                fos.write(buffer);
-                fos.close();
-            } catch (Exception e) {
-                Log.d(Dry.TAG, "error2");
+                buffer=outputStream.toByteArray();
+                try {
+                    FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", (String) samplePack[i].filename));
+                    fos.write(buffer);
+                    fos.close();
+                } catch (Exception e) {
+                    Log.d(Dry.TAG, "error2");
+                }
             }
         }
     }

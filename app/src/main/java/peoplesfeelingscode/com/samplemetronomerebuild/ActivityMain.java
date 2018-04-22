@@ -175,7 +175,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                     setUpDirectory();
                     welcomeDialog.show(getFragmentManager().beginTransaction(), "");
                 default:
-                    Storage.writeSamplePack(this, lastVersionSetUp, currentVersion);
+                    Storage.writeSamplePack(this, lastVersionSetUp);
                     Storage.setSharedPrefInt(currentVersion, Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
             }
         }
