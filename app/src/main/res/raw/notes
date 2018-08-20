@@ -1,5 +1,7 @@
 to do
     fix activity starting triggering stop()
+    remove thing.wav and wood_beam.wav
+    add setting "sort notes alphabetically by default" i guess radio button for default sort
 
 store listing
     precision

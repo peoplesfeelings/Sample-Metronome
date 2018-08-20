@@ -66,8 +66,6 @@ public class Storage {
     static Sample[] samplePack = {
             new Sample(8, R.raw.guitar_hit_5, "guitar_hit_5.wav"),
             new Sample(9, R.raw.window, "window.wav"),
-            new Sample(9, R.raw.thing, "thing.wav"),
-            new Sample(9, R.raw.wood_beam, "wood_beam.wav"),
     };
 
     //////////////// write stuff /////////////////
