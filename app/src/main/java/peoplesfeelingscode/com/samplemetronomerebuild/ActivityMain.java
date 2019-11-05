@@ -22,14 +22,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
@@ -54,10 +50,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
 
     int permissionCheck;
-
-    MyService service;
-    ServiceConnection connection;
-    boolean bound;
 
     HGDialV2 hgDialV2;
     HGDialV2.IHGDial ihgDial;
@@ -85,7 +77,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         setContentView(R.layout.activity_main);
 
-        bound = false;
         dontStop = false;
 
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
@@ -100,31 +91,15 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         welcomeDialog = new FragmentMainActivityWelcome();
         problemDialog = new FragmentMainActivityProblem();
 
-        setUpServiceConnection();
-
         getPermissionForWrite();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        doBindService();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        doUnbindService();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        if (bound && !service.playing) {
-            stopService(new Intent(this, MyService.class));
+        if (isBound() && !getService().isPlaying()) {
+            stopService(new Intent(this, getServiceClass()));
         }
     }
 
@@ -134,8 +109,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     versionSetUp();
-                    if (bound) {
-                        service.loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
+                    if (isBound()) {
+//                        service.loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
                     }
                 } else {
                     Toast toast = new Toast(this);
@@ -150,6 +125,16 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 return;
             }
         }
+    }
+
+    @Override
+    public void onConnect() {
+        super.onConnect();
+
+        setUpDial();
+        setUpEditText();
+        setUpSpinner();
+        setUpListeners();
     }
 
     void getPermissionForWrite() {
@@ -209,57 +194,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         Storage.setSharedPref(true, Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
     }
 
-    void doBindService() {
-        Context context = getApplicationContext();
-        if (!Dry.serviceRunning(context, MyService.class)) {
-            startService(new Intent(context, MyService.class));
-        }
-
-        if (!bound) {
-            Intent intent = new Intent(context, MyService.class);
-            bindService(intent, connection, Context.BIND_ABOVE_CLIENT);
-            bound = true;
-        }
-    }
-
-    void doUnbindService() {
-        if (bound) {
-            service.setCallbacks(null);
-            unbindService(connection);
-            bound = false;
-        }
-    }
-
-    void setUpServiceConnection() {
-        connection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName className, IBinder iBinder) {
-                MyService.MyBinder binder = (MyService.MyBinder) iBinder;
-                service = binder.getService();
-                service.setCallbacks(ActivityMain.this);
-                if (!service.problem.equals("")) {
-                    showProblemInfo(service.problem);
-                    service.problem = "";
-                }
-
-                if (service.playing) {
-                    btnStartStop.setText(getResources().getString(R.string.btnStop));
-                }
-
-                setUpDial();
-                setUpEditText();
-                setUpSpinner();
-                setUpListeners();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName arg0) {
-                service = null;
-                bound = false;
-            }
-        };
-    }
-
     void setUpListeners() {
         btnSamples.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -270,25 +204,21 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         btnStartStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!service.playing) {
+                if (!getService().isPlaying()) {
                     if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
                         Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
                         toast.show();
                         return;
                     }
-                    if (bound) {
-                        service.setInterval(hgDialV2.getFullTextureAngle());
-                        service.start();
+                    if (isBound()) {
+                        getService().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
+                        getService().play();
                         btnStartStop.setText(getResources().getString(R.string.btnStop));
-                    } else {
-                        doBindService();
                     }
                 } else {
-                    if (bound) {
-                        service.stop();
+                    if (isBound()) {
+                        getService().stop();
                         btnStartStop.setText(getResources().getString(R.string.btnStart));
-                    } else {
-                        doBindService();
                     }
                 }
             }
@@ -315,8 +245,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-                service.rate = rateSpinnerPosToFloat(pos);
-                service.setInterval(hgDialV2.getFullTextureAngle());
+//                service.rate = rateSpinnerPosToFloat(pos);
+//                service.setInterval(hgDialV2.getFullTextureAngle());
                 Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
             }
 
@@ -331,7 +261,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
 
         rateSpinner.setSelection(storedRate);
-        service.rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
+//        service.rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
     }
 
     double rateSpinnerPosToFloat(int pos) {
@@ -367,10 +297,10 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                         hgDialV2.doRapidDial(fta);
                         hgDialV2.doManualGestureDial(fta);
 
-                        service.setInterval(hgDialV2.getFullTextureAngle());
-                        service.stop();
-
-                        btnStartStop.setText(getResources().getString(R.string.btnStart));
+                        getService().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
+//                        getService().stop();
+//
+//                        btnStartStop.setText(getResources().getString(R.string.btnStart));
 
                         Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                     }
@@ -394,7 +324,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
                 txtBpm.setText(Double.toString(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()))));
-                service.setInterval(preventNegative(hgDialV2.getFullTextureAngle()));
+                getService().setBpm(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle())));
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -404,7 +334,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 double bpm = Storage.ftaToBpm(fta);
 
                 txtBpm.setText(Double.toString(bpm));
-                service.setInterval(fta);
+                getService().setBpm(bpm);
 
                 Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
 

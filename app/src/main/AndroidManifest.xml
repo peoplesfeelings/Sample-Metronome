@@ -43,6 +43,11 @@
             android:name=".MyService"
             android:enabled="true"
             android:exported="false"></service>
+        <service
+            android:description="@string/txtServiceDescription"
+            android:name=".mypfseq"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>

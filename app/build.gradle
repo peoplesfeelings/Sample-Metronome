@@ -5,7 +5,7 @@ android {
     buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "peoplesfeelingscode.com.samplemetronomerebuild"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 26
         versionCode 12
         versionName "1.11"
@@ -33,4 +33,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation project(':HGDialV2-release')
     implementation 'commons-io:commons-io:2.6'
+    implementation project(':pfseq-debug')
 }
