@@ -14,7 +14,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -35,7 +34,7 @@ public class MyService extends Service {
     long startTime;
     long lastTick;
     int count = 0;
-    double interval;
+    double interval; // millis
     boolean fileBeingLoaded;
 
     @Override
@@ -77,6 +76,7 @@ public class MyService extends Service {
             @Override
             public void run() {
                 if (Storage.fileNeedsToBeLoaded && !fileBeingLoaded) {
+                    // run on ui thread
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {

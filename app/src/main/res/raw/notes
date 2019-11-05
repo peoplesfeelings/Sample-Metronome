@@ -1,7 +1,31 @@
 to do
+    consider how to bake in error correction
+        in the track
+    find out if there is a minimum length feasible without letting buffered pcm run out
+    switch to an actual loop instead of a handler looper
+    switch to streaming pcm to audiotrack
+    switch to BigDecimal for interval and values used to produce interval
+        MILLIS_IN_MINUTE
+        fta
+        SENSITIVITY_FACTOR
+        rate
+        count
+    establish tests for timing precision
+        getTimingDeviationForTick
+        getPossibleTimingDeviationFromStart
+    add size limit for sample
+    redo error reporting from service so that it can be sent to either activity
     fix activity starting triggering stop()
     remove thing.wav and wood_beam.wav
     fix margins on about page
+    if more than 1 tick per beat, sub-beats should be lower volume
+    if (mime.startsWith("audio/"))
+    i think i remember fixing an issue by changing a factor of 2 to 1 or 1 to 2
+        i think i was erroneously writing to byte array when i should have been writing to short array
+    look into error reporting
+        android playstore
+        log file
+        popup with email link
 
 store listing
     precision
@@ -9,19 +33,45 @@ store listing
     update accepted files
 
 maybe do
+    consolidate similar code across format decoders/parsers
     move fileNeedsToBeLoaded to Dry
     call at.release in onstop?
         would need to set fileNeedsToBeLoaded to true
     replace WaveInfo with subclass of MediaFormat
-    consolidate similar code across format decoders/parsers
     remove fileBeingLoaded initialization in service onCreate
 
 audiotrack
     https://android.googlesource.com/platform/frameworks/base/+/android-4.4_r1/media/java/android/media/AudioTrack.java
 
+precision testing
+    https://docs.oracle.com/javase/7/docs/api/java/math/BigDecimal.html
+    2 types of precision
+        deviation from start
+            measurement:
+            metric: time until possibleDeviationFromStart > allowedDeviationFromStart
+            tickTime = startTime + (interval * count)
+                     = startTime:long + ( ( (MILLIS_IN_MINUTE:int / (fta:double * SENSITIVITY_FACTOR:double) ) / rate:double) * count)
+                     = startTime:long + ( ( (int / (double * double) ) / double) * int)
+                startTime: long
+                    comes from upTimeMillis
+                interval: double
+                    comes from setInterval
+                        ( MILLIS_IN_MINUTE / ftaToBPM ) / rate
+                        MILLIS_IN_MINUTE: int: 60 000
+                        ftaToBPM
+                            fta * SENSITIVITY_FACTOR
+                                fta: double
+                                SENSITIVITY_FACTOR: double
+                        rate: double
+                count: int
+            scale of interval a factor
+        deviation for tick
+            difference between millis when sample plays and millis when it should have played
+            scale of interval a factor
 
 
-documentation
+
+documentation (technical design to be replaced by pending new rebuild)
     had to go with AudioTrack class because MediaPlayer and SoundPool introduce latency to timing of individual ticks being played
         alternatives like exoplayer are bloated. using them to get raw PCM is as much as work as just decoding files ourselves
         decoding the audio files in order to feed AudioTrack raw PCM data means using the MediaCodec API
@@ -107,6 +157,175 @@ documentation
     decoder workflow diagram
         https://drive.google.com/file/d/15RkGM2yxLSBOSa7fqDMVjZ_NewCASOQn/view?usp=sharing
 
+performance optimizations
+    quickest way to generate a chunk of silence
+
+
+
+
+algorithm for new app technical design
+    activities extends pfseqactivity
+    service extends pfseq
+        set up track and loop in setUpTracks
+    PFSeq (reusable precision timing module for sequencers)
+        threads
+            PFSeq runs a "control loop" thread for the main real-time event processing
+                expensive tasks needed from there should be run on the main thread, possibly queued
+        PFSeqActivity abstract class
+            purposes
+                offer methods for service to use
+                get binder, which has methods offered by service
+            create a new ServiceConnection
+                sets eventHandler for connection established that gets binder
+            member variables
+                bound
+                serviceconnection
+            abstract method
+                showProblemInfo(String message)
+                onConnect()
+                    to be called in serviceconnection's onServiceConnected listener
+                    an activity extending the abstract class may set up GUI event listeners that call service methods here
+            method
+                doBindService
+                    if service not running, start service
+                    if service not bound, bind service
+                    bound = true
+                doUnbindService
+                    if bound
+                        null callback
+                        unbind
+                        bound = false
+                onStart
+                    doBindService
+                onStop
+                    doUnbindService
+        PFSeq abstract service
+            inner class child class of Binder
+                way for service to offer methods for activities to use
+                    just give reference to the whole service instance
+            life cycle
+                created when a PFSeqActivity is created
+                not explicitly destroyed. GC takes care of it if it is not foreground (if its no playing)
+            constants
+                extraTimeForProcessing1
+                    how much latency should be catered for when calculating when to stream audiotrack a segment
+                        how soon before the end of buffered pcm you need to send it more
+            abstract methods
+                setUpForeground
+                setUpTracks
+            member variables
+                currentSampleRate
+                ArrayList of Track objects
+                tempoBeginsTime
+                playingBeginsTime
+                framesSent // since playing begins
+                placeInTime                                                     [NOT USED HERE]
+                mediaFormat
+                bPM
+                beatDuration
+                    like 'interval' in previous design
+                count // number of bars so far
+                lastBeat // used when changing tempo
+                baseActivity // connection to activity
+            methods
+                setCallbacks(PFSeqActivity)
+                    when the activity receives the binder from the service, it gives the service a reference to itself
+                onBind
+                    return binder
+                onUnbind
+                    void pFSeqActivity
+                setTempo
+                    if playing
+                        tempoBeginsTime = lastBeat
+                        count = 0
+                    else
+                        startTime = -1
+                    assign bpm
+                    beatDuration = a minute / bpm
+                setTimeSignature(TimeSignature)                                 [NOT USED HERE]
+                getTimeSignature()                                              [NOT USED HERE]
+                startPlaying()
+                    toggle boolean
+                    startforeground
+                    create controlLoop thread
+                stopPlaying()
+                    toggle boolean
+                    stopforeground
+                handleProblem(message)
+                    call baseActivity.showProblemInfo(message)
+                getIsPlaying()
+        PFSeqTrack class
+            constant
+                MAX_CLIP_LENGTH
+            constructor(sequencer)
+            private member variables
+                loop
+                audioTrack
+                label                                                                [NOT USED HERE]
+                clips
+            public methods
+                initializeAudioTrack(mediaFormat)
+                getTrackLabel                                                        [NOT USED HERE]
+                setTrackLabel                                                        [NOT USED HERE]
+                setClip(clipLabel, filename)
+                removeClip(clipLabel)
+                play(placeInTime)
+                    creat thread
+                    run on thread
+                stop()
+            member boolean
+                readyToPlay
+        PFSeqTimeSignature class
+            beatsPerBar
+            NoteValueForBeat
+        PFSeqNoteValue class
+            enum class with constructor to set BigDecimal value
+        PFSeqClip class
+            constant
+                MAX_CLIP_LENGTH
+            constructor(track)
+            member variables
+                fileBeingLoaded
+                fileNeedsToBeLoaded
+                    initialized true
+                label
+                filename
+                mediaFormat
+                pCM
+                track
+            methods
+                getPCM
+                    if (fileNeedsToBeLoaded && not fileBeingLoaded)
+                        loadFile (run on ui thread)
+                    if (not fileNeedsToBeLoaded)
+                loadFile(filename)
+                    assign fileBeingLoaded true
+                    compare file MediaFormat to track's audiotrack mediaFormat (and if it's null, the sequencer's mediaFormat)
+                    if compatible
+                        get the PCM and the MediaFormat
+                        if clipLength over MAX_CLIP_LENGTH
+                            abridge to MAX_CLIP_LENGTH
+                        store length
+                    else
+                        set fileNeedsToBeLoaded to true and filename to empty string
+                    assign fileNeedsToBeLoaded false
+                    assign fileBeingLoaded false
+                setLabel
+                getLabel
+                setFileNeedsToBeLoaded(filename)
+                    clear PCM
+                    assign filename
+                    assign fileNeedsToBeLoaded true
+                    assign fileBeingLoaded false
+        PFSeqPianoRoll class
+            beatsPerBar
+                0 for non-repeating
+            loopItems
+        PFSeqPianoRollItem class
+            position
+                in beats
+            clip
+            velocity
 
 
 
@@ -115,6 +334,12 @@ documentation
 
 
 
+
+
+
+########################## misc notes #########################################
+
+48,000 samples per second means 48 samples per millisecond
 
 
 

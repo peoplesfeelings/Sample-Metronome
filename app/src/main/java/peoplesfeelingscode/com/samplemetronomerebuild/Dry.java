@@ -4,6 +4,9 @@ import android.app.ActivityManager;
 import android.content.Context;
 
 public class Dry {
+    static int ALLOWED_DEVIATION_FROM_START = 100; // millis. has to be greater than ALLOWED_DEVIATION_FOR_TICK
+    static int ALLOWED_DEVIATION_FOR_TICK = 100; // millis
+    static int MAX_BPM = 1000;
     static int MILLIS_IN_SECOND = 1000;
     static int MILLIS_IN_MINUTE = MILLIS_IN_SECOND * 60;
     static String TAG = "-------*********-------";
