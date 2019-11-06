@@ -69,6 +69,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
     boolean dontStop;
 
+    // activity life cycle stuff
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,7 +94,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         getPermissionForWrite();
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -103,6 +103,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
     }
 
+    // permission stuff
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -126,6 +127,15 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             }
         }
     }
+    void getPermissionForWrite() {
+        permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
+        } else {
+            versionSetUp();
+        }
+    }
 
     @Override
     public void onConnect() {
@@ -137,16 +147,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         setUpListeners();
     }
 
-    void getPermissionForWrite() {
-        permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
-        } else {
-            versionSetUp();
-        }
-    }
-
+    // app setup stuff
     void versionSetUp() {
         int lastVersionSetUp = getLastVersionSetUp();
         int currentVersion = BuildConfig.VERSION_CODE;
@@ -163,7 +164,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             }
         }
     }
-
     int getLastVersionSetUp() {
         boolean hasRunBefore = Storage.getSharedPrefBool(Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
         int lastVersionSetUp = Storage.getSharedPrefInt(Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
@@ -179,12 +179,10 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         return lastVersionSetUp;
     }
-
     void setUpDirectory() {
         Storage.makeDirectoryIfNeeded();
         Storage.writeNoMediaFile(this);
     }
-
     void setDefaultSettings() {
         //set default settings
         Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
@@ -194,6 +192,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         Storage.setSharedPref(true, Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
     }
 
+    // ui component setup stuff
     void setUpListeners() {
         btnSamples.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,7 +223,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             }
         });
     }
-
     void setUpSpinner() {
         spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rates)) {
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -263,22 +261,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         rateSpinner.setSelection(storedRate);
 //        service.rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
     }
-
-    double rateSpinnerPosToFloat(int pos) {
-        switch(pos) {
-            case 0:
-                return 0.5;
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 4;
-        }
-
-        return -1;
-    }
-
     void setUpEditText() {
         textWatcher = new TextWatcher() {
             @Override
@@ -310,7 +292,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         txtBpm.addTextChangedListener(textWatcher);
     }
-
     void setUpDial() {
         dontStop = true;
 
@@ -348,17 +329,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         dontStop = false;
     }
-
-    double preventNegative(double fta) {
-        if (fta < 0) {
-            hgDialV2.setFullTextureAngle(0);
-
-            return 0;
-        }
-
-        return fta;
-    }
-
     void loadStoredAngle() {
         double fta = Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this);
 
@@ -372,7 +342,31 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         hgDialV2.doRapidDial(fta);
         hgDialV2.doManualGestureDial(fta);
     }
+    double rateSpinnerPosToFloat(int pos) {
+        switch(pos) {
+            case 0:
+                return 0.5;
+            case 1:
+                return 1;
+            case 2:
+                return 2;
+            case 3:
+                return 4;
+        }
 
+        return -1;
+    }
+
+    double preventNegative(double fta) {
+        if (fta < 0) {
+            hgDialV2.setFullTextureAngle(0);
+
+            return 0;
+        }
+
+        return fta;
+    }
+    
     public void showProblemInfo(String message) {
         btnStartStop.setText(getResources().getString(R.string.btnStart));
         

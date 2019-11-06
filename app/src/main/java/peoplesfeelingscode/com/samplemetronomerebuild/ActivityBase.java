@@ -63,11 +63,6 @@ public class ActivityBase extends PFSeqActivity {
         return mypfseq.class;
     }
 
-
-
-
-
-
     private boolean configureSequecer(PFSeq seq) {
         HashMap<String, Integer> myConfigInts = new HashMap<String, Integer>() {{
             put(ONGOING_NOTIF_ID, 4345);
