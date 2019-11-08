@@ -48,6 +48,8 @@ import java.io.File;
 
 public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
+    final static int TEMPO_CHANGE_POLLING_MS = 1;
+
 
     int permissionCheck;
 
@@ -66,6 +68,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
     FragmentMainActivityWelcome welcomeDialog;
     FragmentMainActivityProblem problemDialog;
+    private long lastBpmChangeMillis;
 
     boolean dontStop;
 
@@ -211,6 +214,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                     }
                     if (isBound()) {
                         getService().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
+                        lastBpmChangeMillis = System.currentTimeMillis();
                         getService().play();
                         btnStartStop.setText(getResources().getString(R.string.btnStop));
                     }
@@ -304,20 +308,24 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
-                txtBpm.setText(Double.toString(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()))));
-                getService().setBpm(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle())));
+                if(System.currentTimeMillis() > lastBpmChangeMillis + TEMPO_CHANGE_POLLING_MS) {
+                    double acceptedBpm = getService().setBpm(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle())));
+                    lastBpmChangeMillis = System.currentTimeMillis();
+                    txtBpm.setText(Double.toString(acceptedBpm));
+                }
             }
             @Override
             public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
             @Override
             public void onUp(HGDialInfo hgDialInfo) {
-                double fta = preventNegative(hgDialV2.getFullTextureAngle());
-                double bpm = Storage.ftaToBpm(fta);
+                double bpm = Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()));
 
-                txtBpm.setText(Double.toString(bpm));
-                getService().setBpm(bpm);
+                double acceptedBpm = getService().setBpm(bpm);
+                lastBpmChangeMillis = System.currentTimeMillis();
+                txtBpm.setText(Double.toString(acceptedBpm));
 
-                Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
+                double acceptedFta = Storage.bpmToFta(acceptedBpm);
+                Storage.setSharedPrefDouble(editor, acceptedFta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
 
                 dontStop = false;
             }
@@ -366,7 +374,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         return fta;
     }
-    
+
     public void showProblemInfo(String message) {
         btnStartStop.setText(getResources().getString(R.string.btnStart));
         

@@ -1,0 +1,12 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.WarwickWestonWright.HGDialV2.HGDialV2
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:HGDialV2Drawable="@android:drawable/ic_menu_add"/>
+
+</FrameLayout>

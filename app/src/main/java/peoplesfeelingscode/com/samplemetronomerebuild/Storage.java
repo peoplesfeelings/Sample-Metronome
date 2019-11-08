@@ -37,7 +37,7 @@ import java.util.Comparator;
 
 public class Storage {
 
-    static final double SENSITIVITY_FACTOR = 9.0;
+    static final double SENSITIVITY_FACTOR = 30.0;
 
     static final String SHARED_PREF_FILE_NAME = "pf-sm-file";
     static final boolean DEFAULT_SHARED_PREF_BOOL = false;
