@@ -247,8 +247,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-//                service.rate = rateSpinnerPosToFloat(pos);
-//                service.setInterval(hgDialV2.getFullTextureAngle());
+                setSeqRate(getService().getTracks().get(0).getPianoRoll(), pos);
+
                 Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
             }
 
@@ -263,7 +263,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
 
         rateSpinner.setSelection(storedRate);
-//        service.rate = rateSpinnerPosToFloat(rateSpinner.getSelectedItemPosition());
+        setSeqRate(getService().getTracks().get(0).getPianoRoll(), rateSpinner.getSelectedItemPosition());
     }
     void setUpEditText() {
         textWatcher = new TextWatcher() {
@@ -333,36 +333,20 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
         hgDialV2.registerCallback(ihgDial);
 
-        loadStoredAngle();
-
-        dontStop = false;
-    }
-    void loadStoredAngle() {
+        // load stored fta
         double fta = Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this);
-
         /* after first install, ui set-up methods run before versionSetUp runs */
         if (fta == Storage.DEFAULT_SHARED_PREF_INT) {
             fta = Storage.bpmToFta(Storage.DEFAULT_BPM);
         }
-
         txtBpm.setText(Double.toString(Storage.ftaToBpm(fta)));
-
         hgDialV2.doRapidDial(fta);
         hgDialV2.doManualGestureDial(fta);
-    }
-    double rateSpinnerPosToFloat(int pos) {
-        switch(pos) {
-            case 0:
-                return 0.5;
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            case 3:
-                return 4;
-        }
 
-        return -1;
+        dontStop = false;
+    }
+    private void setSeqTempo() {
+        //
     }
 
     double preventNegative(double fta) {

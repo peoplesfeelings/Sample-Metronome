@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 
 import peoplesfeelingscode.com.pfseq.PFSeq;
+import peoplesfeelingscode.com.pfseq.PFSeqClip;
 
 public class mypfseq extends PFSeq {
+    private PFSeqClip theClip;
     @Override
     public Notification getNotification() {
         Notification notification;
@@ -47,5 +49,13 @@ public class mypfseq extends PFSeq {
                             .build();
         }
         return notification;
+    }
+
+    // accessors
+    public PFSeqClip getTheClip() {
+        return theClip;
+    }
+    public void setTheClip(PFSeqClip theClip) {
+        this.theClip = theClip;
     }
 }
