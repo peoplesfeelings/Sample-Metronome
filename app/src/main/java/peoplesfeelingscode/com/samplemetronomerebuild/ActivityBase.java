@@ -9,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import peoplesfeelingscode.com.pfseq.PFSeq;
@@ -30,16 +29,25 @@ import static peoplesfeelingscode.com.pfseq.PFSeqMessage.ERROR_MSG_PREFIX;
 import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ALERT;
 import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
 import static peoplesfeelingscode.com.pfseq.PFSeqTimeOffset.MODE_FRACTIONAL;
-import static peoplesfeelingscode.com.samplemetronomerebuild.Storage.SHARED_PREF_RATE_KEY;
 
 public class ActivityBase extends PFSeqActivity {
 
+    final static String FIRST_QUARTER_NOTE = "first quarter note";
+    final static String FIRST_SIXTEENTH_NOTE = "first sixteenth note";
+    final static String FIRST_EIGHTH_NOTE = "first eighth note";
+    final static String THIRD_SIXTEENTH_NOTE = "third sixteenth note";
+    final static String SECOND_QUARTER_NOTE = "second quarter note";
+    final static String FIFTH_SIXTEENTH_NOTE = "fifth sixteenth note";
+    final static String THIRD_EIGHTH_NOTE = "third eighth note";
+    final static String SEVENTH_SIXTEENTH_NOTE = "seventh sixteenth note";
+    final static String TRACK_NAME = "metronome";
+
     @Override
     public void onConnect() {
-        if (!getService().isSetUp()) {
-            boolean success = configureSequecer(getService());
+        if (!getSeq().isSetUp()) {
+            boolean success = configureSequecer(getSeq());
             if (success) {
-                setUpTracks((mypfseq) getService());
+                setUpTracks((mypfseq) getSeq());
             }
         }
     }
@@ -81,89 +89,104 @@ public class ActivityBase extends PFSeqActivity {
     }
 
     private boolean setUpTracks(mypfseq seq) {
-        //clip stuff
+        // assumes two over four time signature
+
+        // set clip
         String fileName = Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, getApplicationContext());
         File audFile = new File(Storage.path + File.separator + fileName);
         if (!audFile.exists()) {
             receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ERROR, "file doesn't exist \n"));
             return false;
         }
-        seq.setTheClip(new PFSeqClip(seq, audFile));
+        PFSeqClip clip = new PFSeqClip(seq, audFile);
+        seq.setTheClip(clip);
 
-        // rate stuff
-        int rateSpinnerPos = Storage.getSharedPrefInt(SHARED_PREF_RATE_KEY, getApplicationContext());
+        // create piano roll items
+        PFSeqTimeOffset zeroQuarterNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 1, 0, false, -1);
+        PFSeqPianoRollItem zeroQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_QUARTER_NOTE, zeroQuarterNotesFromBarStart);
+        PFSeqTimeOffset oneSixteenthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 1, false, -1);
+        PFSeqPianoRollItem oneSixteenthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_SIXTEENTH_NOTE, oneSixteenthNoteFromBarStart);
+        PFSeqTimeOffset oneEigthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 2, 1, false, -1);
+        PFSeqPianoRollItem oneEighthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_EIGHTH_NOTE, oneEigthNoteFromBarStart);
+        PFSeqTimeOffset threeSixteenthNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 3, false, -1);
+        PFSeqPianoRollItem threeSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_SIXTEENTH_NOTE, threeSixteenthNotesFromBarStart);
+        PFSeqTimeOffset oneQuarterNoteFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 1, 0, false, -1);
+        PFSeqPianoRollItem oneQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, SECOND_QUARTER_NOTE, oneQuarterNoteFromBarStart);
+        PFSeqTimeOffset fiveSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 1, false, -1);
+        PFSeqPianoRollItem fiveSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, FIFTH_SIXTEENTH_NOTE, fiveSixteenthNotesFromBarStart);
+        PFSeqTimeOffset threeEighthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 2, 1, false, -1);
+        PFSeqPianoRollItem threeEighthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_EIGHTH_NOTE, threeEighthNotesFromBarStart);
+        PFSeqTimeOffset sevenSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 3, false, -1);
+        PFSeqPianoRollItem sevenSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, SEVENTH_SIXTEENTH_NOTE, sevenSixteenthNotesFromBarStart);
 
-        // track stuff
-        PFSeqTrack metronomeTrack = new PFSeqTrack(seq, "metronome");
-        PFSeqTimeOffset timeOffset = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, 0, 1, 0, false, 0);
-        PFSeqPianoRollItem item = new PFSeqPianoRollItem(seq, seq.getTheClip(), "the tick", timeOffset);
-        metronomeTrack.addPianoRollItem(item);
+        // add pr items to track
+        PFSeqTrack metronomeTrack = new PFSeqTrack(seq, TRACK_NAME);
+        metronomeTrack.addPianoRollItem(zeroQuarterNote);
+        metronomeTrack.addPianoRollItem(oneSixteenthNote);
+        metronomeTrack.addPianoRollItem(oneEighthNote);
+        metronomeTrack.addPianoRollItem(threeSixteenthNotes);
+        metronomeTrack.addPianoRollItem(oneQuarterNote);
+        metronomeTrack.addPianoRollItem(fiveSixteenthNotes);
+        metronomeTrack.addPianoRollItem(threeEighthNotes);
+        metronomeTrack.addPianoRollItem(sevenSixteenthNotes);
 
+        // add track to seq
         seq.addTrack(metronomeTrack);
 
         return true;
     }
-    protected void setSeqRate(ArrayList<PFSeqPianoRollItem> pianoroll, int spinnerPos) {
+    protected void setSeqRate(int spinnerPos) {
         // assumes two over four time signature
 
-        int rollCount = pianoroll.size();
-        if (rollCount > 0) {
-            pianoroll.clear();
+        PFSeqTrack track = getSeq().getTrackByName(TRACK_NAME);
+        if (track == null) {
+            return;
         }
-        PFSeqClip clip = ((mypfseq) getService()).getTheClip();
-
-
-        PFSeqTimeOffset zeroQuarterNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 1, 0, false, -1);
-        PFSeqPianoRollItem zeroQuarterNote = new PFSeqPianoRollItem(getService(), clip, "first quarter", zeroQuarterNotesFromBarStart);
-
-        PFSeqTimeOffset oneSixteenthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 1, false, -1);
-        PFSeqPianoRollItem oneSixteenthNote = new PFSeqPianoRollItem(getService(), clip, "first sixteenth", oneSixteenthNoteFromBarStart);
-
-        PFSeqTimeOffset oneEigthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 2, 1, false, -1);
-        PFSeqPianoRollItem oneEighthNote = new PFSeqPianoRollItem(getService(), clip, "first eighth", oneEigthNoteFromBarStart);
-
-        PFSeqTimeOffset threeSixteenthNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 3, false, -1);
-        PFSeqPianoRollItem threeSixteenthNotes = new PFSeqPianoRollItem(getService(), clip, "first sixteenth", threeSixteenthNotesFromBarStart);
-
-        PFSeqTimeOffset oneQuarterNoteFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 1, 0, false, -1);
-        PFSeqPianoRollItem oneQuarterNote = new PFSeqPianoRollItem(getService(), clip, "second quarter", oneQuarterNoteFromBarStart);
-
-        PFSeqTimeOffset fiveSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 1, false, -1);
-        PFSeqPianoRollItem fiveSixteenthNotes = new PFSeqPianoRollItem(getService(), clip, "first sixteenth", fiveSixteenthNotesFromBarStart);
-
-        PFSeqTimeOffset threeEighthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 2, 1, false, -1);
-        PFSeqPianoRollItem threeEighthNotes = new PFSeqPianoRollItem(getService(), clip, "second eighth", threeEighthNotesFromBarStart);
-
-        PFSeqTimeOffset sevenSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 3, false, -1);
-        PFSeqPianoRollItem sevenSixteenthNotes = new PFSeqPianoRollItem(getService(), clip, "first sixteenth", sevenSixteenthNotesFromBarStart);
 
         switch(spinnerPos) {
             case 0:
                 // ticks per beat: 0.5
-                pianoroll.add(zeroQuarterNote);
+                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
+                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(false);
+                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
+                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                 break;
             case 1:
                 // ticks per beat: 1
-                pianoroll.add(zeroQuarterNote);
-                pianoroll.add(oneQuarterNote);
+                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
+                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
+                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
+                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                 break;
             case 2:
                 // ticks per beat: 2
-                pianoroll.add(zeroQuarterNote);
-                pianoroll.add(oneEighthNote);
-                pianoroll.add(oneQuarterNote);
-                pianoroll.add(threeEighthNotes);
+                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
+                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
+                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
+                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                 break;
             case 3:
                 // ticks per beat: 4
-                pianoroll.add(zeroQuarterNote);
-                pianoroll.add(oneSixteenthNote);
-                pianoroll.add(oneEighthNote);
-                pianoroll.add(threeSixteenthNotes);
-                pianoroll.add(oneQuarterNote);
-                pianoroll.add(fiveSixteenthNotes);
-                pianoroll.add(threeEighthNotes);
-                pianoroll.add(sevenSixteenthNotes);
+                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(true);
+                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
+                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(true);
+                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
+                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(true);
+                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
+                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(true);
                 break;
         }
     }

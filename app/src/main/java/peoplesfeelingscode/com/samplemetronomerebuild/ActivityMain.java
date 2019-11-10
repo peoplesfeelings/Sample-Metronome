@@ -101,7 +101,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (isBound() && !getService().isPlaying()) {
+        if (isBound() && !getSeq().isPlaying()) {
             stopService(new Intent(this, getServiceClass()));
         }
     }
@@ -206,21 +206,21 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         btnStartStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!getService().isPlaying()) {
+                if (!getSeq().isPlaying()) {
                     if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
                         Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
                         toast.show();
                         return;
                     }
                     if (isBound()) {
-                        getService().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
+                        getSeq().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
                         lastBpmChangeMillis = System.currentTimeMillis();
-                        getService().play();
+                        getSeq().play();
                         btnStartStop.setText(getResources().getString(R.string.btnStop));
                     }
                 } else {
                     if (isBound()) {
-                        getService().stop();
+                        getSeq().stop();
                         btnStartStop.setText(getResources().getString(R.string.btnStart));
                     }
                 }
@@ -247,7 +247,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-                setSeqRate(getService().getTracks().get(0).getPianoRoll(), pos);
+                setSeqRate(pos);
 
                 Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
             }
@@ -263,7 +263,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
 
         rateSpinner.setSelection(storedRate);
-        setSeqRate(getService().getTracks().get(0).getPianoRoll(), rateSpinner.getSelectedItemPosition());
+        setSeqRate(rateSpinner.getSelectedItemPosition());
     }
     void setUpEditText() {
         textWatcher = new TextWatcher() {
@@ -283,10 +283,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                         hgDialV2.doRapidDial(fta);
                         hgDialV2.doManualGestureDial(fta);
 
-                        getService().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
-//                        getService().stop();
-//
-//                        btnStartStop.setText(getResources().getString(R.string.btnStart));
+                        getSeq().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
 
                         Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                     }
@@ -309,7 +306,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             @Override
             public void onMove(HGDialInfo hgDialInfo) {
                 if(System.currentTimeMillis() > lastBpmChangeMillis + TEMPO_CHANGE_POLLING_MS) {
-                    double acceptedBpm = getService().setBpm(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle())));
+                    double acceptedBpm = getSeq().setBpm(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle())));
                     lastBpmChangeMillis = System.currentTimeMillis();
                     txtBpm.setText(Double.toString(acceptedBpm));
                 }
@@ -320,7 +317,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             public void onUp(HGDialInfo hgDialInfo) {
                 double bpm = Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()));
 
-                double acceptedBpm = getService().setBpm(bpm);
+                double acceptedBpm = getSeq().setBpm(bpm);
                 lastBpmChangeMillis = System.currentTimeMillis();
                 txtBpm.setText(Double.toString(acceptedBpm));
 

@@ -1,4 +1,6 @@
 to do
+    fix it so dial cant wind beyond the limits
+    don't need to pass adapter activity because you can get it activity context from view instances
     consider how to bake in error correction
         in the track
     find out if there is a minimum length feasible without letting buffered pcm run out

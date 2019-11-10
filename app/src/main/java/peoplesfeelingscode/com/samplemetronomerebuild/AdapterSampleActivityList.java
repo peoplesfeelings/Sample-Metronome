@@ -31,6 +31,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import peoplesfeelingscode.com.pfseq.PFSeq;
+import peoplesfeelingscode.com.pfseq.PFSeqActivity;
+
 public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
     ActivitySample activity;
     ArrayList<ObjectFile> files;
@@ -45,6 +48,8 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
     @Override
     public View getView(final int pos, View v, ViewGroup parent) {
         final int position = pos;
+        PFSeqActivity pfSeqActivity = (PFSeqActivity) parent.getContext();
+        PFSeq seq = pfSeqActivity.getSeq();
 
         ViewHolderSampleActivityList holder = null;
 
