@@ -29,10 +29,17 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import peoplesfeelingscode.com.pfseq.PFSeq;
 import peoplesfeelingscode.com.pfseq.PFSeqActivity;
+import peoplesfeelingscode.com.pfseq.PFSeqClip;
+import peoplesfeelingscode.com.pfseq.PFSeqMessage;
+import peoplesfeelingscode.com.pfseq.PFSeqPianoRollItem;
+import peoplesfeelingscode.com.pfseq.PFSeqTrack;
+
+import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
 
 public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
     ActivitySample activity;
@@ -48,8 +55,10 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
     @Override
     public View getView(final int pos, View v, ViewGroup parent) {
         final int position = pos;
-        PFSeqActivity pfSeqActivity = (PFSeqActivity) parent.getContext();
+        final PFSeqActivity pfSeqActivity = (PFSeqActivity) parent.getContext();
         PFSeq seq = pfSeqActivity.getSeq();
+        PFSeqTrack track = seq.getTrackByName(ActivityBase.TRACK_NAME);
+        final ArrayList<PFSeqPianoRollItem> pianoRoll = track.getPianoRoll();
 
         ViewHolderSampleActivityList holder = null;
 
@@ -86,8 +95,17 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
                     }
                     cb.setChecked(true);
 
-                    Storage.setSharedPrefString(files.get(pos).name, Storage.SHARED_PREF_SELECTED_FILE_KEY, activity);
-                    Storage.fileNeedsToBeLoaded = true;
+                    String filename = files.get(pos).name;
+                    File file = new File(Storage.path + File.separator + filename);
+                    if (!file.exists()) {
+                        activity.receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ERROR, "file doesn't exist \n"));
+                    } else {
+                        PFSeqClip clip = new PFSeqClip(pfSeqActivity.getSeq(), file);
+                        for (PFSeqPianoRollItem item : pianoRoll) {
+                            item.setClip(clip);
+                        }
+                        Storage.setSharedPrefString(filename, Storage.SHARED_PREF_SELECTED_FILE_KEY, activity);
+                    }
                 } else {
                     cb.setChecked(true);
                 }

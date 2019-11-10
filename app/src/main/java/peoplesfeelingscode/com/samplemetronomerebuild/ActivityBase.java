@@ -29,6 +29,7 @@ import static peoplesfeelingscode.com.pfseq.PFSeqMessage.ERROR_MSG_PREFIX;
 import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ALERT;
 import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
 import static peoplesfeelingscode.com.pfseq.PFSeqTimeOffset.MODE_FRACTIONAL;
+import static peoplesfeelingscode.com.samplemetronomerebuild.Storage.SHARED_PREF_RATE_KEY;
 
 public class ActivityBase extends PFSeqActivity {
 
@@ -99,7 +100,6 @@ public class ActivityBase extends PFSeqActivity {
             return false;
         }
         PFSeqClip clip = new PFSeqClip(seq, audFile);
-        seq.setTheClip(clip);
 
         // create piano roll items
         PFSeqTimeOffset zeroQuarterNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 1, 0, false, -1);
@@ -132,6 +132,10 @@ public class ActivityBase extends PFSeqActivity {
 
         // add track to seq
         seq.addTrack(metronomeTrack);
+
+        // tick rate
+        int rateSpinnerPos = Storage.getSharedPrefInt(SHARED_PREF_RATE_KEY, getApplicationContext());
+        setSeqRate(rateSpinnerPos);
 
         return true;
     }
