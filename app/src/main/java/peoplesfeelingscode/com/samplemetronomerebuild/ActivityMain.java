@@ -70,8 +70,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     FragmentMainActivityProblem problemDialog;
     private long lastBpmChangeMillis;
 
-    boolean dontStop;
-
     // activity life cycle stuff
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +78,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         Log.d(Dry.TAG, "onCreate !!!!!!!!!!!!!!!!!!!");
 
         setContentView(R.layout.activity_main);
-
-        dontStop = false;
 
         hgDialV2 = (HGDialV2) findViewById(R.id.hgDialV2);
         txtBpm = (TextView) findViewById(R.id.txtBpm);
@@ -275,18 +271,16 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (!dontStop) {
-                    String input = txtBpm.getText().toString();
-                    if (input.length() > 0 && !input.equals(".")) {
-                        double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
+                String input = txtBpm.getText().toString();
+                if (input.length() > 0 && !input.equals(".")) {
+                    double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
 
-                        hgDialV2.doRapidDial(fta);
-                        hgDialV2.doManualGestureDial(fta);
+                    hgDialV2.doRapidDial(fta);
+                    hgDialV2.doManualGestureDial(fta);
 
-                        getSeq().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
+                    getSeq().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
 
-                        Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
-                    }
+                    Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                 }
             }
         };
@@ -294,12 +288,10 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         txtBpm.addTextChangedListener(textWatcher);
     }
     void setUpDial() {
-        dontStop = true;
-
         ihgDial = new HGDialV2.IHGDial() {
             @Override
             public void onDown(HGDialInfo hgDialInfo) {
-                dontStop = true;
+                //
             }
             @Override
             public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
@@ -323,8 +315,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
 
                 double acceptedFta = Storage.bpmToFta(acceptedBpm);
                 Storage.setSharedPrefDouble(editor, acceptedFta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
-
-                dontStop = false;
             }
         };
 
@@ -339,8 +329,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         txtBpm.setText(Double.toString(Storage.ftaToBpm(fta)));
         hgDialV2.doRapidDial(fta);
         hgDialV2.doManualGestureDial(fta);
-
-        dontStop = false;
     }
     private void setSeqTempo() {
         //

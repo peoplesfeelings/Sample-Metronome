@@ -64,7 +64,7 @@ public class ActivitySample extends ActivityBase {
     @Override
     public void onConnect() {
         super.onConnect();
-        
+
         setUpListView();
     }
 
