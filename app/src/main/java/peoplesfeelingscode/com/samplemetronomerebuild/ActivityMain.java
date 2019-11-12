@@ -48,7 +48,8 @@ import java.io.File;
 
 public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
-    final static int TEMPO_CHANGE_POLLING_MS = 1;
+    final static int TEMPO_CHANGE_POLLING_MS = 1
+            ;
 
 
     int permissionCheck;
@@ -75,7 +76,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(Dry.TAG, "onCreate !!!!!!!!!!!!!!!!!!!");
+        Log.d(Dry.TAG, "onCreate ");
 
         setContentView(R.layout.activity_main);
 
