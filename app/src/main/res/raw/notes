@@ -1,4 +1,7 @@
 to do
+    relay pfseq messages to app user
+        if clip doesn't validate
+    test what happens if file is deleted
     bug:
         expected result: after selecting an audio file that works, it should start sounding again
         observed result: after selecting an audio file that works, it does not start sounding again until user navigates back to main activity

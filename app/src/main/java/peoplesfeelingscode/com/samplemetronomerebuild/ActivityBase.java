@@ -142,56 +142,77 @@ public class ActivityBase extends PFSeqActivity {
     protected void setSeqRate(int spinnerPos) {
         // assumes two over four time signature
 
-        PFSeqTrack track = getSeq().getTrackByName(TRACK_NAME);
-        if (track == null) {
-            return;
-        }
+        if (isBound()) {
+            PFSeqTrack track = getSeq().getTrackByName(TRACK_NAME);
+            if (track == null) {
+                return;
+            }
 
-        switch(spinnerPos) {
-            case 0:
-                // ticks per beat: 0.5
-                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
-                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(false);
-                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
-                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
-                break;
-            case 1:
-                // ticks per beat: 1
-                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
-                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
-                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
-                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
-                break;
-            case 2:
-                // ticks per beat: 2
-                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
-                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
-                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
-                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
-                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
-                break;
-            case 3:
-                // ticks per beat: 4
-                track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(true);
-                track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
-                track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(true);
-                track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
-                track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(true);
-                track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
-                track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(true);
-                break;
+            if (spinnerPos == getSeqRate(track)) {
+                return;
+            }
+
+            switch(spinnerPos) {
+                case 0:
+                    // ticks per beat: 0.5
+                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(false);
+                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
+                    break;
+                case 1:
+                    // ticks per beat: 1
+                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
+                    break;
+                case 2:
+                    // ticks per beat: 2
+                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
+                    break;
+                case 3:
+                    // ticks per beat: 4
+                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(true);
+                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(true);
+                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(true);
+                    break;
+            }
+        }
+    }
+    protected int getSeqRate(PFSeqTrack track) {
+        if (track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).isEnabled()) {
+            return 3;
+        } else {
+            if (track.getPrItemByName(THIRD_EIGHTH_NOTE).isEnabled()) {
+                return 2;
+            } else {
+                if (track.getPrItemByName(SECOND_QUARTER_NOTE).isEnabled()) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
         }
     }
 
