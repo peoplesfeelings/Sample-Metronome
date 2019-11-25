@@ -139,6 +139,7 @@ public class ActivityMain extends ActivityBase {
         }
     }
 
+    // pfseq stuff
     @Override
     public void onConnect() {
         super.onConnect();

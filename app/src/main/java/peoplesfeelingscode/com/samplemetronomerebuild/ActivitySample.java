@@ -56,8 +56,6 @@ public class ActivitySample extends ActivityBase {
 
         files = Storage.getFileList(Storage.path);
 
-        setUpListView();
-
         checkForEmptyList();
     }
 

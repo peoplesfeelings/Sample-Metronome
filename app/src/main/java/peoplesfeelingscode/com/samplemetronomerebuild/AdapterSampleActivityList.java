@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,7 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
 
     @Override
     public View getView(final int pos, View v, ViewGroup parent) {
+        Log.d(Dry.TAG, "getView fire");
         final int position = pos;
         final PFSeqActivity pfSeqActivity = (PFSeqActivity) parent.getContext();
         PFSeq seq = pfSeqActivity.getSeq();

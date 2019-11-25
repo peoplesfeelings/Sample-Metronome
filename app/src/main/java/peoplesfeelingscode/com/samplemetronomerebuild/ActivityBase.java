@@ -3,7 +3,6 @@
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,12 +42,11 @@ abstract class ActivityBase extends PFSeqActivity {
     final static String SEVENTH_SIXTEENTH_NOTE = "seventh sixteenth note";
     final static String TRACK_NAME = "metronome";
 
-    FragmentMainActivityProblem problemDialog;
-
     // audio sequencer stuff
     @Override
     public void onConnect() {
         if (!getSeq().isSetUp()) {
+            Log.d(Dry.TAG, "setting up sequencer");
             boolean success = configureSequecer(getSeq());
             if (success) {
                 setUpTracks((mypfseq) getSeq());
@@ -73,6 +71,7 @@ abstract class ActivityBase extends PFSeqActivity {
 
         Log.d(LOG_TAG, "receiveMessage call - " + prefix + pfSeqMessage.getMessage());
 
+        FragmentMainActivityProblem problemDialog = new FragmentMainActivityProblem();
         problemDialog.setArgs(prefix + pfSeqMessage.getMessage());
         problemDialog.show(getFragmentManager().beginTransaction(), "");
     }
@@ -99,15 +98,14 @@ abstract class ActivityBase extends PFSeqActivity {
         }
         return true;
     }
-    private boolean setUpTracks(mypfseq seq) {
+    private void setUpTracks(mypfseq seq) {
         // assumes two over four time signature
 
         // set clip
         String fileName = Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, getApplicationContext());
         File audFile = new File(Storage.path + File.separator + fileName);
         if (!audFile.exists()) {
-            receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ERROR, "file doesn't exist \n"));
-            return false;
+            receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ERROR, "file " + audFile.getName() + " doesn't exist. go to Samples screen"));
         }
         PFSeqClip clip = new PFSeqClip(seq, audFile);
 
@@ -142,8 +140,6 @@ abstract class ActivityBase extends PFSeqActivity {
 
         // add track to seq
         seq.addTrack(metronomeTrack);
-
-        return true;
     }
     protected void setSeqRate(int spinnerPos) {
         // assumes two over four time signature
@@ -209,12 +205,6 @@ abstract class ActivityBase extends PFSeqActivity {
     }
 
     // activity overrides
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        problemDialog = new FragmentMainActivityProblem();
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
