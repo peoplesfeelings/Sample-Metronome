@@ -49,6 +49,10 @@ public class ActivityBase extends PFSeqActivity {
             boolean success = configureSequecer(getSeq());
             if (success) {
                 setUpTracks((mypfseq) getSeq());
+
+                // tick rate
+                int rateSpinnerPos = Storage.getSharedPrefInt(SHARED_PREF_RATE_KEY, getApplicationContext());
+                setSeqRate(rateSpinnerPos);
             }
         }
     }
@@ -74,6 +78,9 @@ public class ActivityBase extends PFSeqActivity {
 
     private boolean configureSequecer(PFSeq seq) {
         HashMap<String, Integer> myConfigInts = new HashMap<String, Integer>() {{
+//            put(BUFFER_SIZE_BYTES, 200000);
+//            put(CONTROL_THREAD_POLLING_MILLIS, 50);
+//            put(MIN_MILLIS_AHEAD_TO_WRITE, 300);
             put(ONGOING_NOTIF_ID, 4345);
             put(TIME_SIG_UPPER, 2);
             put(TIME_SIG_LOWER, 4);
@@ -133,10 +140,6 @@ public class ActivityBase extends PFSeqActivity {
         // add track to seq
         seq.addTrack(metronomeTrack);
 
-        // tick rate
-        int rateSpinnerPos = Storage.getSharedPrefInt(SHARED_PREF_RATE_KEY, getApplicationContext());
-        setSeqRate(rateSpinnerPos);
-
         return true;
     }
     protected void setSeqRate(int spinnerPos) {
@@ -145,15 +148,18 @@ public class ActivityBase extends PFSeqActivity {
         if (isBound()) {
             PFSeqTrack track = getSeq().getTrackByName(TRACK_NAME);
             if (track == null) {
+                Log.d(LOG_TAG, "setSegRate failed, track null");
                 return;
             }
 
-            if (spinnerPos == getSeqRate(track)) {
-                return;
-            }
+//            if (spinnerPos == getSeqRate(track)) {
+//                Log.d(LOG_TAG, "setSegRate - already set ");
+//                return;
+//            }
 
             switch(spinnerPos) {
                 case 0:
+                    Log.d(LOG_TAG, "setSegRate ticks per beat: 0.5");
                     // ticks per beat: 0.5
                     track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
                     track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
@@ -165,6 +171,7 @@ public class ActivityBase extends PFSeqActivity {
                     track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                     break;
                 case 1:
+                    Log.d(LOG_TAG, "setSegRate ticks per beat: 1");
                     // ticks per beat: 1
                     track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
                     track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
@@ -176,6 +183,7 @@ public class ActivityBase extends PFSeqActivity {
                     track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                     break;
                 case 2:
+                    Log.d(LOG_TAG, "setSegRate ticks per beat: 2");
                     // ticks per beat: 2
                     track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
                     track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
@@ -187,6 +195,7 @@ public class ActivityBase extends PFSeqActivity {
                     track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                     break;
                 case 3:
+                    Log.d(LOG_TAG, "setSegRate ticks per beat: 4");
                     // ticks per beat: 4
                     track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
                     track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(true);
@@ -200,21 +209,21 @@ public class ActivityBase extends PFSeqActivity {
             }
         }
     }
-    protected int getSeqRate(PFSeqTrack track) {
-        if (track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).isEnabled()) {
-            return 3;
-        } else {
-            if (track.getPrItemByName(THIRD_EIGHTH_NOTE).isEnabled()) {
-                return 2;
-            } else {
-                if (track.getPrItemByName(SECOND_QUARTER_NOTE).isEnabled()) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        }
-    }
+//    protected int getSeqRate(PFSeqTrack track) {
+//        if (track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).isEnabled()) {
+//            return 3;
+//        } else {
+//            if (track.getPrItemByName(THIRD_EIGHTH_NOTE).isEnabled()) {
+//                return 2;
+//            } else {
+//                if (track.getPrItemByName(SECOND_QUARTER_NOTE).isEnabled()) {
+//                    return 1;
+//                } else {
+//                    return 0;
+//                }
+//            }
+//        }
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

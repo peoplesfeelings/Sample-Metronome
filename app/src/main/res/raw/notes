@@ -2,6 +2,7 @@ to do
     relay pfseq messages to app user
         if clip doesn't validate
     test what happens if file is deleted
+        fix bug in which samples activity crashes if selected sample had been deleted
     bug:
         expected result: after selecting an audio file that works, it should start sounding again
         observed result: after selecting an audio file that works, it does not start sounding again until user navigates back to main activity
@@ -9,32 +10,12 @@ to do
             start metronome
             select an audio file that doesn't load successfully
             select a different audio file that does load successfully
-    fix bug in which samples activity crashes if selected sample had been deleted
     fix it so dial cant wind beyond the limits
     don't need to pass adapter activity because you can get it activity context from view instances
-    consider how to bake in error correction
-        in the track
-    find out if there is a minimum length feasible without letting buffered pcm run out
-    switch to an actual loop instead of a handler looper
-    switch to streaming pcm to audiotrack
-    switch to BigDecimal for interval and values used to produce interval
-        MILLIS_IN_MINUTE
-        fta
-        SENSITIVITY_FACTOR
-        rate
-        count
-    establish tests for timing precision
-        getTimingDeviationForTick
-        getPossibleTimingDeviationFromStart
-    add size limit for sample
     redo error reporting from service so that it can be sent to either activity
-    fix activity starting triggering stop()
     remove thing.wav and wood_beam.wav
     fix margins on about page
     if more than 1 tick per beat, sub-beats should be lower volume
-    if (mime.startsWith("audio/"))
-    i think i remember fixing an issue by changing a factor of 2 to 1 or 1 to 2
-        i think i was erroneously writing to byte array when i should have been writing to short array
     look into error reporting
         android playstore
         log file
