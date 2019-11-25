@@ -46,7 +46,11 @@ import com.WarwickWestonWright.HGDialV2.HGDialV2;
 
 import java.io.File;
 
-public class ActivityMain extends ActivityBase implements ServiceCallbacks {
+import peoplesfeelingscode.com.pfseq.PFSeqMessage;
+
+import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
+
+public class ActivityMain extends ActivityBase {
     final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
     final static int TEMPO_CHANGE_POLLING_MS = 100;
 
@@ -67,7 +71,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     ArrayAdapter<String> spinnerAdapter;
 
     FragmentMainActivityWelcome welcomeDialog;
-    FragmentMainActivityProblem problemDialog;
     private long lastBpmChangeMillis;
 
     // activity life cycle stuff
@@ -89,7 +92,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         editor = sharedPrefs.edit();
 
         welcomeDialog = new FragmentMainActivityWelcome();
-        problemDialog = new FragmentMainActivityProblem();
 
         getPermissionForWrite();
 
@@ -111,9 +113,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     versionSetUp();
-                    if (isBound()) {
-//                        service.loadFile(Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, this));
-                    }
                 } else {
                     Toast toast = new Toast(this);
                     toast.setView(getLayoutInflater().inflate(R.layout.toast, null));
@@ -129,9 +128,11 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         }
     }
     void getPermissionForWrite() {
+        Log.d(Dry.TAG, "checking for write permission");
         permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            Log.d(Dry.TAG, "write permission not yet granted");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
         } else {
             versionSetUp();
@@ -143,7 +144,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         super.onConnect();
 
         // set up dial
-
         ihgDial = new HGDialV2.IHGDial() {
             @Override
             public void onDown(HGDialInfo hgDialInfo) {
@@ -177,7 +177,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 Storage.setSharedPrefDouble(editor, acceptedFta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
             }
         };
-
         hgDialV2.registerCallback(ihgDial);
 
         // load stored fta
@@ -189,9 +188,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         hgDialV2.doRapidDial(fta);
         hgDialV2.doManualGestureDial(fta);
 
-
         // set up edit text
-
         textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -214,12 +211,9 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 }
             }
         };
-
         txtBpm.addTextChangedListener(textWatcher);
 
-
         // set up spinner
-
         spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rates)) {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = super.getView(position, convertView, parent);
@@ -232,10 +226,8 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
                 return v;
             }
         };
-
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         rateSpinner.setAdapter(spinnerAdapter);
-
         rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
@@ -247,19 +239,15 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
-
         int tickRate = Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this);
         /* after first install, ui set-up methods run before versionSetUp runs */
         if (tickRate == Storage.DEFAULT_SHARED_PREF_INT) {
             tickRate = Storage.DEFAULT_RATE;
         }
-
         rateSpinner.setSelection(tickRate);
         setSeqRate(rateSpinner.getSelectedItemPosition());
 
-
-        // set up listeners
-
+        // button listeners
         btnSamples.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -295,6 +283,7 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
     void versionSetUp() {
         int lastVersionSetUp = getLastVersionSetUp();
         int currentVersion = BuildConfig.VERSION_CODE;
+        Log.d(Dry.TAG, "checking version set up. last version set up: " + lastVersionSetUp + " current version: " + currentVersion);
 
         if (currentVersion > lastVersionSetUp) {
             switch (lastVersionSetUp) {
@@ -336,19 +325,6 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         Storage.setSharedPref(true, Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
     }
 
-    // ui component setup stuff
-    void setUpListeners() {
-    }
-    void setUpSpinner() {
-    }
-    void setUpEditText() {
-    }
-    void setUpDial() {
-    }
-    private void setSeqTempo() {
-        //
-    }
-
     double preventNegative(double fta) {
         if (fta < 0) {
             hgDialV2.setFullTextureAngle(0);
@@ -359,10 +335,19 @@ public class ActivityMain extends ActivityBase implements ServiceCallbacks {
         return fta;
     }
 
-    public void showProblemInfo(String message) {
-        btnStartStop.setText(getResources().getString(R.string.btnStart));
-        
-        problemDialog.setArgs(message);
-        problemDialog.show(getFragmentManager().beginTransaction(), "");
+    @Override
+    public void receiveMessage(PFSeqMessage pfSeqMessage) {
+        super.receiveMessage(pfSeqMessage);
+
+        switch (pfSeqMessage.getType()) {
+            case MESSAGE_TYPE_ERROR:
+                if (isBound()) {
+                    if (getSeq().isSetUp() && getSeq().isPlaying()) {
+                        getSeq().stop();
+                    }
+                    btnStartStop.setText(getResources().getString(R.string.btnStart));
+                }
+                break;
+        }
     }
 }

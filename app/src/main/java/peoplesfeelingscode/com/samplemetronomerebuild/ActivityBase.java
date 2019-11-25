@@ -31,7 +31,7 @@ import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
 import static peoplesfeelingscode.com.pfseq.PFSeqTimeOffset.MODE_FRACTIONAL;
 import static peoplesfeelingscode.com.samplemetronomerebuild.Storage.SHARED_PREF_RATE_KEY;
 
-public class ActivityBase extends PFSeqActivity {
+abstract class ActivityBase extends PFSeqActivity {
 
     final static String FIRST_QUARTER_NOTE = "first quarter note";
     final static String FIRST_SIXTEENTH_NOTE = "first sixteenth note";
@@ -43,6 +43,9 @@ public class ActivityBase extends PFSeqActivity {
     final static String SEVENTH_SIXTEENTH_NOTE = "seventh sixteenth note";
     final static String TRACK_NAME = "metronome";
 
+    FragmentMainActivityProblem problemDialog;
+
+    // audio sequencer stuff
     @Override
     public void onConnect() {
         if (!getSeq().isSetUp()) {
@@ -56,26 +59,27 @@ public class ActivityBase extends PFSeqActivity {
             }
         }
     }
-
     @Override
     public void receiveMessage(PFSeqMessage pfSeqMessage) {
         String prefix = "";
-
         switch (pfSeqMessage.getType()) {
-            case MESSAGE_TYPE_ALERT: prefix = ALERT_MSG_PREFIX;
+            case MESSAGE_TYPE_ALERT:
+                prefix = ALERT_MSG_PREFIX;
                 break;
-            case MESSAGE_TYPE_ERROR: prefix = ERROR_MSG_PREFIX;
+            case MESSAGE_TYPE_ERROR:
+                prefix = ERROR_MSG_PREFIX;
                 break;
         }
 
         Log.d(LOG_TAG, "receiveMessage call - " + prefix + pfSeqMessage.getMessage());
-    }
 
+        problemDialog.setArgs(prefix + pfSeqMessage.getMessage());
+        problemDialog.show(getFragmentManager().beginTransaction(), "");
+    }
     @Override
     public Class getServiceClass() {
         return mypfseq.class;
     }
-
     private boolean configureSequecer(PFSeq seq) {
         HashMap<String, Integer> myConfigInts = new HashMap<String, Integer>() {{
 //            put(BUFFER_SIZE_BYTES, 200000);
@@ -95,7 +99,6 @@ public class ActivityBase extends PFSeqActivity {
         }
         return true;
     }
-
     private boolean setUpTracks(mypfseq seq) {
         // assumes two over four time signature
 
@@ -205,21 +208,20 @@ public class ActivityBase extends PFSeqActivity {
         }
     }
 
+    // activity overrides
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base);
-    }
 
+        problemDialog = new FragmentMainActivityProblem();
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.about_item:
                 startActivity(new Intent(ActivityBase.this, ActivityAbout.class));

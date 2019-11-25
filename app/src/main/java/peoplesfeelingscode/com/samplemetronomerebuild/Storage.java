@@ -59,13 +59,13 @@ public class Storage {
     static final int DEFAULT_RATE = 1;
 
     static File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/");
-    static File oldPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Precise_Sample_Metronome/");
-
-    static boolean fileNeedsToBeLoaded;
 
     static Sample[] samplePack = {
             new Sample(8, R.raw.guitar_hit_5, "guitar_hit_5.wav"),
             new Sample(9, R.raw.window, "window.wav"),
+            new Sample(13, R.raw.guitar_hit_1, "guitar_hit_1.flac"),
+            new Sample(13, R.raw.thing, "thing.wav"),
+            new Sample(13, R.raw.wood_beam, "wood_beam.wav"),
     };
 
     //////////////// write stuff /////////////////
@@ -98,6 +98,7 @@ public class Storage {
     }
 
     static void writeSamplePack(Activity activity, int lastVersionCodeSetUp) {
+        Log.d(Dry.TAG, "writing samples");
         for (int i = 0; i < samplePack.length; i++) {
             if (samplePack[i].versionIntroduced > lastVersionCodeSetUp) {
                 InputStream ins = activity.getResources().openRawResource(samplePack[i].rawResource);
@@ -118,6 +119,7 @@ public class Storage {
                     FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sample_Metronome/", (String) samplePack[i].filename));
                     fos.write(buffer);
                     fos.close();
+                    Log.d(Dry.TAG, "wrote " + samplePack[i].filename);
                 } catch (Exception e) {
                     Log.d(Dry.TAG, "error2");
                 }
