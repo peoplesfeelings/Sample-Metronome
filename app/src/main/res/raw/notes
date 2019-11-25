@@ -1,4 +1,7 @@
 to do
+    test
+        delete file name after samples activty shows it then try to select it
+        select a file that doesn't load successfully by pfseq (mono)
     relay pfseq messages to app user
         if clip doesn't validate
     test what happens if file is deleted

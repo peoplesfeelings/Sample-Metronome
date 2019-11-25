@@ -39,6 +39,7 @@ import peoplesfeelingscode.com.pfseq.PFSeqMessage;
 import peoplesfeelingscode.com.pfseq.PFSeqPianoRollItem;
 import peoplesfeelingscode.com.pfseq.PFSeqTrack;
 
+import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ALERT;
 import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
 
 public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
@@ -101,10 +102,14 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
                         activity.receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ERROR, "file doesn't exist \n"));
                     } else {
                         PFSeqClip clip = new PFSeqClip(pfSeqActivity.getSeq(), file);
-                        for (PFSeqPianoRollItem item : pianoRoll) {
-                            item.setClip(clip);
+                        if (clip.isLoadedSuccessfully()) {
+                            for (PFSeqPianoRollItem item : pianoRoll) {
+                                item.setClip(clip);
+                            }
+                            Storage.setSharedPrefString(filename, Storage.SHARED_PREF_SELECTED_FILE_KEY, activity);
+                        } else {
+                            activity.receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ALERT, clip.getFile().getName() + " not loaded successfully. error message: " + clip.getErrorMsg()));
                         }
-                        Storage.setSharedPrefString(filename, Storage.SHARED_PREF_SELECTED_FILE_KEY, activity);
                     }
                 } else {
                     cb.setChecked(true);

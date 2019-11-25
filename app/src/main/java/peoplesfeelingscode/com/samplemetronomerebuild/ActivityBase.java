@@ -152,11 +152,6 @@ public class ActivityBase extends PFSeqActivity {
                 return;
             }
 
-//            if (spinnerPos == getSeqRate(track)) {
-//                Log.d(LOG_TAG, "setSegRate - already set ");
-//                return;
-//            }
-
             switch(spinnerPos) {
                 case 0:
                     Log.d(LOG_TAG, "setSegRate ticks per beat: 0.5");
@@ -209,21 +204,6 @@ public class ActivityBase extends PFSeqActivity {
             }
         }
     }
-//    protected int getSeqRate(PFSeqTrack track) {
-//        if (track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).isEnabled()) {
-//            return 3;
-//        } else {
-//            if (track.getPrItemByName(THIRD_EIGHTH_NOTE).isEnabled()) {
-//                return 2;
-//            } else {
-//                if (track.getPrItemByName(SECOND_QUARTER_NOTE).isEnabled()) {
-//                    return 1;
-//                } else {
-//                    return 0;
-//                }
-//            }
-//        }
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
