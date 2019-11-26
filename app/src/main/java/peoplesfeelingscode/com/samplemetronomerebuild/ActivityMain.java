@@ -208,6 +208,9 @@ public class ActivityMain extends ActivityBase {
                     startActivity(new Intent(ActivityMain.this, ActivitySample.class));
                 }
             });
+            if (getSeq().isPlaying()) {
+                btnStartStop.setText(getResources().getString(R.string.btnStop));
+            }
             btnStartStop.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
