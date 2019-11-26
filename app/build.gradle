@@ -6,9 +6,9 @@ android {
     defaultConfig {
         applicationId "peoplesfeelingscode.com.samplemetronomerebuild"
         minSdkVersion 24
-        targetSdkVersion 26
-        versionCode 13
-        versionName "1.12"
+        targetSdkVersion 28
+        versionCode 16
+        versionName "1.15"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

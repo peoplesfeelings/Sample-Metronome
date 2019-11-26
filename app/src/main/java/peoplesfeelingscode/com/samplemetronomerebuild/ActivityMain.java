@@ -21,13 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -51,17 +46,10 @@ import peoplesfeelingscode.com.pfseq.PFSeqMessage;
 import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
 
 public class ActivityMain extends ActivityBase {
-    final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
     final static int TEMPO_CHANGE_POLLING_MS = 100;
-
-
-    int permissionCheck;
 
     HGDialV2 hgDialV2;
     HGDialV2.IHGDial ihgDial;
-
-    SharedPreferences sharedPrefs;
-    SharedPreferences.Editor editor;
 
     TextView txtBpm;
     Button btnSamples;
@@ -70,7 +58,6 @@ public class ActivityMain extends ActivityBase {
     TextWatcher textWatcher;
     ArrayAdapter<String> spinnerAdapter;
 
-    FragmentMainActivityWelcome welcomeDialog;
     private long lastBpmChangeMillis;
 
     // activity life cycle stuff
@@ -87,16 +74,13 @@ public class ActivityMain extends ActivityBase {
         btnSamples = (Button) findViewById(R.id.btnSamples);
         btnStartStop = (Button) findViewById(R.id.btnStartStop);
         rateSpinner = (Spinner) findViewById(R.id.rateSpinner);
-
-        sharedPrefs = getSharedPreferences(Storage.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
-        editor = sharedPrefs.edit();
-
-        welcomeDialog = new FragmentMainActivityWelcome();
-
-        getPermissionForWrite();
-
-        txtBpm.setText(Double.toString(Storage.ftaToBpm(Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this))));
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -106,236 +90,149 @@ public class ActivityMain extends ActivityBase {
         }
     }
 
-    // permission stuff
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    versionSetUp();
-                } else {
-                    Toast toast = new Toast(this);
-                    toast.setView(getLayoutInflater().inflate(R.layout.toast, null));
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    TextView text = (TextView) toast.getView().findViewById(R.id.txt);
-                    text.setText(getResources().getString(R.string.toastWritePermissionNotGranted));
-                    toast.show();
-
-                    finish();
-                }
-                return;
-            }
-        }
-    }
-    void getPermissionForWrite() {
-        Log.d(Dry.TAG, "checking for write permission");
-        permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            Log.d(Dry.TAG, "write permission not yet granted");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
-        } else {
-            versionSetUp();
-        }
-    }
-
     // pfseq stuff
     @Override
     public void onConnect() {
         super.onConnect();
 
-        // set up dial
-        ihgDial = new HGDialV2.IHGDial() {
-            @Override
-            public void onDown(HGDialInfo hgDialInfo) {
-                //
-            }
-            @Override
-            public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
-            @Override
-            public void onMove(HGDialInfo hgDialInfo) {
-                if(System.currentTimeMillis() > lastBpmChangeMillis + TEMPO_CHANGE_POLLING_MS) {
-                    double acceptedBpm = getSeq().setBpm(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle())));
+        // first confirm content has been set up (may not have been if first run and user did not grant write permission yet, in which case this will be called again after setup)
+        if (getSeq().getTracks() != null) {
+            // set up dial
+            ihgDial = new HGDialV2.IHGDial() {
+                @Override
+                public void onDown(HGDialInfo hgDialInfo) {
+                    //
+                }
+                @Override
+                public void onPointerDown(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
+                @Override
+                public void onMove(HGDialInfo hgDialInfo) {
+                    if(System.currentTimeMillis() > lastBpmChangeMillis + TEMPO_CHANGE_POLLING_MS) {
+                        double acceptedBpm = getSeq().setBpm(Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle())));
+                        lastBpmChangeMillis = System.currentTimeMillis();
+                        txtBpm.removeTextChangedListener(textWatcher);
+                        txtBpm.setText(Double.toString(acceptedBpm));
+                        txtBpm.addTextChangedListener(textWatcher);
+                    }
+                }
+                @Override
+                public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
+                @Override
+                public void onUp(HGDialInfo hgDialInfo) {
+                    double bpm = Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()));
+
+                    double acceptedBpm = getSeq().setBpm(bpm);
                     lastBpmChangeMillis = System.currentTimeMillis();
                     txtBpm.removeTextChangedListener(textWatcher);
                     txtBpm.setText(Double.toString(acceptedBpm));
                     txtBpm.addTextChangedListener(textWatcher);
+
+                    double acceptedFta = Storage.bpmToFta(acceptedBpm);
+                    Storage.setSharedPrefDouble(editor, acceptedFta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                 }
+            };
+            hgDialV2.registerCallback(ihgDial);
+
+            // load stored fta
+            double fta = Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this);
+            /* after first install, ui set-up methods run before appVersionSetUp runs */
+            if (fta == Storage.DEFAULT_SHARED_PREF_INT) {
+                fta = Storage.bpmToFta(Storage.DEFAULT_BPM);
             }
-            @Override
-            public void onPointerUp(HGDialInfo hgDialInfo) { /* Do Your Thing */ }
-            @Override
-            public void onUp(HGDialInfo hgDialInfo) {
-                double bpm = Storage.ftaToBpm(preventNegative(hgDialV2.getFullTextureAngle()));
+            hgDialV2.doRapidDial(fta);
+            hgDialV2.doManualGestureDial(fta);
 
-                double acceptedBpm = getSeq().setBpm(bpm);
-                lastBpmChangeMillis = System.currentTimeMillis();
-                txtBpm.removeTextChangedListener(textWatcher);
-                txtBpm.setText(Double.toString(acceptedBpm));
-                txtBpm.addTextChangedListener(textWatcher);
+            // set up edit text
+            txtBpm.setText(Double.toString(Storage.ftaToBpm(Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this))));
+            textWatcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
-                double acceptedFta = Storage.bpmToFta(acceptedBpm);
-                Storage.setSharedPrefDouble(editor, acceptedFta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
-            }
-        };
-        hgDialV2.registerCallback(ihgDial);
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
-        // load stored fta
-        double fta = Storage.getSharedPrefDouble(sharedPrefs, Storage.SHARED_PREF_FTA_KEY, this);
-        /* after first install, ui set-up methods run before versionSetUp runs */
-        if (fta == Storage.DEFAULT_SHARED_PREF_INT) {
-            fta = Storage.bpmToFta(Storage.DEFAULT_BPM);
-        }
-        hgDialV2.doRapidDial(fta);
-        hgDialV2.doManualGestureDial(fta);
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    String input = txtBpm.getText().toString();
+                    if (input.length() > 0 && !input.equals(".")) {
+                        double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
 
-        // set up edit text
-        textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                        hgDialV2.doRapidDial(fta);
+                        hgDialV2.doManualGestureDial(fta);
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                String input = txtBpm.getText().toString();
-                if (input.length() > 0 && !input.equals(".")) {
-                    double fta = Storage.bpmToFta(Double.parseDouble(txtBpm.getText().toString()));
-
-                    hgDialV2.doRapidDial(fta);
-                    hgDialV2.doManualGestureDial(fta);
-
-                    getSeq().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
-
-                    Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
-                }
-            }
-        };
-        txtBpm.addTextChangedListener(textWatcher);
-
-        // set up spinner
-        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rates)) {
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = super.getView(position, convertView, parent);
-                ((TextView) v).setGravity(Gravity.CENTER);
-                return v;
-            }
-            public View getDropDownView(int position, View convertView,ViewGroup parent) {
-                View v = super.getDropDownView(position, convertView,parent);
-                ((TextView) v).setGravity(Gravity.CENTER);
-                return v;
-            }
-        };
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        rateSpinner.setAdapter(spinnerAdapter);
-        rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-                setSeqRate(pos);
-
-                Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
-        int tickRate = Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this);
-        /* after first install, ui set-up methods run before versionSetUp runs */
-        if (tickRate == Storage.DEFAULT_SHARED_PREF_INT) {
-            tickRate = Storage.DEFAULT_RATE;
-        }
-        rateSpinner.setSelection(tickRate);
-        setSeqRate(rateSpinner.getSelectedItemPosition());
-
-        // button listeners
-        btnSamples.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(ActivityMain.this, ActivitySample.class));
-            }
-        });
-        btnStartStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!getSeq().isPlaying()) {
-                    if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
-                        Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
-                        toast.show();
-                        return;
-                    }
-                    if (isBound()) {
                         getSeq().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
-                        lastBpmChangeMillis = System.currentTimeMillis();
-                        getSeq().play();
-                        btnStartStop.setText(getResources().getString(R.string.btnStop));
-                    }
-                } else {
-                    if (isBound()) {
-                        getSeq().stop();
-                        btnStartStop.setText(getResources().getString(R.string.btnStart));
+
+                        Storage.setSharedPrefDouble(editor, fta, Storage.SHARED_PREF_FTA_KEY, ActivityMain.this);
                     }
                 }
-            }
-        });
-    }
+            };
+            txtBpm.addTextChangedListener(textWatcher);
 
-    // app setup stuff
-    void versionSetUp() {
-        int lastVersionSetUp = getLastVersionSetUp();
-        int currentVersion = BuildConfig.VERSION_CODE;
-        Log.d(Dry.TAG, "checking version set up. last version set up: " + lastVersionSetUp + " current version: " + currentVersion);
-
-        if (currentVersion > lastVersionSetUp) {
-            switch (lastVersionSetUp) {
-                case 0:
-                    setDefaultSettings();
-                    setUpDirectory();
-                    welcomeDialog.show(getFragmentManager().beginTransaction(), "");
-                default:
-                    Storage.writeSamplePack(this, lastVersionSetUp);
-                    Storage.setSharedPrefInt(currentVersion, Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
+            // set up spinner
+            spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.rates)) {
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View v = super.getView(position, convertView, parent);
+                    ((TextView) v).setGravity(Gravity.CENTER);
+                    return v;
+                }
+                public View getDropDownView(int position, View convertView,ViewGroup parent) {
+                    View v = super.getDropDownView(position, convertView,parent);
+                    ((TextView) v).setGravity(Gravity.CENTER);
+                    return v;
+                }
+            };
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            rateSpinner.setAdapter(spinnerAdapter);
+            int tickRate = Storage.getSharedPrefInt(Storage.SHARED_PREF_RATE_KEY, this);
+            /* after first install, ui set-up methods run before appVersionSetUp runs */
+            if (tickRate == Storage.DEFAULT_SHARED_PREF_INT) {
+                tickRate = Storage.DEFAULT_RATE;
             }
+            rateSpinner.setSelection(tickRate);
+            rateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
+                    setSeqRate(pos);
+
+                    Storage.setSharedPrefInt(pos, Storage.SHARED_PREF_RATE_KEY, ActivityMain.this);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {}
+            });
+
+            // button listeners
+            btnSamples.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(ActivityMain.this, ActivitySample.class));
+                }
+            });
+            btnStartStop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!getSeq().isPlaying()) {
+                        if (!new File(Storage.path, Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, ActivityMain.this)).exists()) {
+                            Toast toast = Toast.makeText(ActivityMain.this, R.string.toastSampleNotSelected, Toast.LENGTH_LONG);
+                            toast.show();
+                            return;
+                        }
+                        if (isBound()) {
+                            getSeq().setBpm(Storage.ftaToBpm(hgDialV2.getFullTextureAngle()));
+                            lastBpmChangeMillis = System.currentTimeMillis();
+                            getSeq().play();
+                            btnStartStop.setText(getResources().getString(R.string.btnStop));
+                        }
+                    } else {
+                        if (isBound()) {
+                            getSeq().stop();
+                            btnStartStop.setText(getResources().getString(R.string.btnStart));
+                        }
+                    }
+                }
+            });
         }
     }
-    int getLastVersionSetUp() {
-        boolean hasRunBefore = Storage.getSharedPrefBool(Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
-        int lastVersionSetUp = Storage.getSharedPrefInt(Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
-
-        if (lastVersionSetUp == Storage.DEFAULT_SHARED_PREF_INT) {
-            if (hasRunBefore) {
-                /* 8 is last before version-check was implemented */
-                lastVersionSetUp = 8;
-            } else {
-                lastVersionSetUp = 0;
-            }
-        }
-
-        return lastVersionSetUp;
-    }
-    void setUpDirectory() {
-        Storage.makeDirectoryIfNeeded();
-        Storage.writeNoMediaFile(this);
-    }
-    void setDefaultSettings() {
-        //set default settings
-        Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
-        Storage.setSharedPrefInt(Storage.DEFAULT_RATE, Storage.SHARED_PREF_RATE_KEY, this);
-        Storage.setSharedPrefString(Storage.DEFAULT_SELECTED_FILE_STRING, Storage.SHARED_PREF_SELECTED_FILE_KEY, this);
-
-        Storage.setSharedPref(true, Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
-    }
-
-    double preventNegative(double fta) {
-        if (fta < 0) {
-            hgDialV2.setFullTextureAngle(0);
-
-            return 0;
-        }
-
-        return fta;
-    }
-
     @Override
     public void receiveMessage(PFSeqMessage pfSeqMessage) {
         super.receiveMessage(pfSeqMessage);
@@ -350,5 +247,15 @@ public class ActivityMain extends ActivityBase {
                 }
                 break;
         }
+    }
+
+    double preventNegative(double fta) {
+        if (fta < 0) {
+            hgDialV2.setFullTextureAngle(0);
+
+            return 0;
+        }
+
+        return fta;
     }
 }

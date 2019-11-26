@@ -64,7 +64,12 @@ documentation (technical design to be replaced by pending new rebuild)
                     but will remain for people who have them already
     decoder workflow diagram
         https://drive.google.com/file/d/15RkGM2yxLSBOSa7fqDMVjZ_NewCASOQn/view?usp=sharing
-
+    the breaks
+        first the user needs to grant write permission
+        then the app needs to do version set up
+        then the sequencer needs to be set up
+        then the tracks need to be set up
+        then the rate needs to be set
 
 
 

@@ -2,10 +2,18 @@
 
 package peoplesfeelingscode.com.samplemetronomerebuild;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.HashMap;
@@ -30,7 +38,9 @@ import static peoplesfeelingscode.com.pfseq.PFSeqMessage.MESSAGE_TYPE_ERROR;
 import static peoplesfeelingscode.com.pfseq.PFSeqTimeOffset.MODE_FRACTIONAL;
 import static peoplesfeelingscode.com.samplemetronomerebuild.Storage.SHARED_PREF_RATE_KEY;
 
-abstract class ActivityBase extends PFSeqActivity {
+public abstract class ActivityBase extends PFSeqActivity {
+
+    final static int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT = 3476;
 
     final static String FIRST_QUARTER_NOTE = "first quarter note";
     final static String FIRST_SIXTEENTH_NOTE = "first sixteenth note";
@@ -42,19 +52,17 @@ abstract class ActivityBase extends PFSeqActivity {
     final static String SEVENTH_SIXTEENTH_NOTE = "seventh sixteenth note";
     final static String TRACK_NAME = "metronome";
 
+    FragmentMainActivityWelcome welcomeDialog;
+    SharedPreferences sharedPrefs;
+    SharedPreferences.Editor editor;
+
+    int permissionCheck;
+
     // audio sequencer stuff
     @Override
     public void onConnect() {
         if (!getSeq().isSetUp()) {
-            Log.d(Dry.TAG, "setting up sequencer");
-            boolean success = configureSequecer(getSeq());
-            if (success) {
-                setUpTracks((mypfseq) getSeq());
-
-                // tick rate
-                int rateSpinnerPos = Storage.getSharedPrefInt(SHARED_PREF_RATE_KEY, getApplicationContext());
-                setSeqRate(rateSpinnerPos);
-            }
+            getPermissionForWrite();
         }
     }
     @Override
@@ -78,6 +86,25 @@ abstract class ActivityBase extends PFSeqActivity {
     @Override
     public Class getServiceClass() {
         return mypfseq.class;
+    }
+    protected void setUpSequencerAndContent() {
+        // app setup must have run first
+        if (getLastAppVersionSetUp() > 0) {
+            if (isBound()) {
+                if (!getSeq().isSetUp()) {
+                    Log.d(Dry.TAG, "setting up sequencer");
+                    boolean success = configureSequecer(getSeq());
+                    if (success) {
+                        setUpTracks((mypfseq) getSeq());
+                        setSeqRate(Storage.getSharedPrefInt(SHARED_PREF_RATE_KEY, getApplicationContext()));
+                        onConnect();
+                    }
+                }
+            } else {
+                Log.d(Dry.TAG, "not bound in setUpSequencerAndContent");
+//                receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ERROR, "not bound in setUpSequencerAndContent"));
+            }
+        }
     }
     private boolean configureSequecer(PFSeq seq) {
         HashMap<String, Integer> myConfigInts = new HashMap<String, Integer>() {{
@@ -103,6 +130,9 @@ abstract class ActivityBase extends PFSeqActivity {
 
         // set clip
         String fileName = Storage.getSharedPrefString(Storage.SHARED_PREF_SELECTED_FILE_KEY, getApplicationContext());
+        if (fileName.equals(Storage.DEFAULT_SHARED_PREF_STRING)) {
+            fileName = Storage.DEFAULT_SELECTED_FILE_STRING;
+        }
         File audFile = new File(Storage.path + File.separator + fileName);
         if (!audFile.exists()) {
             receiveMessage(new PFSeqMessage(MESSAGE_TYPE_ERROR, "file " + audFile.getName() + " doesn't exist. go to Samples screen"));
@@ -204,7 +234,96 @@ abstract class ActivityBase extends PFSeqActivity {
         }
     }
 
+    // app setup stuff
+    int getLastAppVersionSetUp() {
+        boolean hasRunBefore = Storage.getSharedPrefBool(Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
+        int lastVersionSetUp = Storage.getSharedPrefInt(Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
+
+        if (lastVersionSetUp == Storage.DEFAULT_SHARED_PREF_INT) {
+            if (hasRunBefore) {
+                /* 8 is last before version-check was implemented */
+                lastVersionSetUp = 8;
+            } else {
+                lastVersionSetUp = 0;
+            }
+        }
+
+        return lastVersionSetUp;
+    }
+    void appVersionSetUp() {
+        int lastVersionSetUp = getLastAppVersionSetUp();
+        int currentVersion = BuildConfig.VERSION_CODE;
+        Log.d(Dry.TAG, "checking version set up. last version set up: " + lastVersionSetUp + " current version: " + currentVersion);
+
+        if (currentVersion > lastVersionSetUp) {
+            switch (lastVersionSetUp) {
+                case 0:
+                    setDefaultSettings();
+                    setUpDirectory();
+                    welcomeDialog.show(getFragmentManager().beginTransaction(), "");
+                default:
+                    Storage.writeSamplePack(this, lastVersionSetUp);
+                    Storage.setSharedPrefInt(currentVersion, Storage.SHARED_PREF_LAST_VERSION_SET_UP, this);
+            }
+        }
+    }
+    void setUpDirectory() {
+        Storage.makeDirectoryIfNeeded();
+        Storage.writeNoMediaFile(this);
+    }
+    void setDefaultSettings() {
+        //set default settings
+        Storage.setSharedPrefDouble(editor, Storage.bpmToFta(Storage.DEFAULT_BPM), Storage.SHARED_PREF_FTA_KEY, this);
+        Storage.setSharedPrefInt(Storage.DEFAULT_RATE, Storage.SHARED_PREF_RATE_KEY, this);
+        Storage.setSharedPrefString(Storage.DEFAULT_SELECTED_FILE_STRING, Storage.SHARED_PREF_SELECTED_FILE_KEY, this);
+
+        Storage.setSharedPref(true, Storage.SHARED_PREF_VERSION_1_WAS_SET_UP_KEY, this);
+    }
+
+    // permission stuff
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    appVersionSetUp();
+                    setUpSequencerAndContent();
+                } else {
+                    Toast toast = new Toast(this);
+                    toast.setView(getLayoutInflater().inflate(R.layout.toast, null));
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    TextView text = (TextView) toast.getView().findViewById(R.id.txt);
+                    text.setText(getResources().getString(R.string.toastWritePermissionNotGranted));
+                    toast.show();
+
+                    finish();
+                }
+                return;
+            }
+        }
+    }
+    void getPermissionForWrite() {
+        Log.d(Dry.TAG, "checking for write permission");
+        permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            Log.d(Dry.TAG, "write permission not yet granted");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_FOR_IMPORT);
+        } else {
+            appVersionSetUp();
+            setUpSequencerAndContent();
+        }
+    }
+
     // activity overrides
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        welcomeDialog = new FragmentMainActivityWelcome();
+        sharedPrefs = getSharedPreferences(Storage.SHARED_PREF_FILE_NAME, MODE_PRIVATE);
+        editor = sharedPrefs.edit();
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
