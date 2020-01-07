@@ -141,21 +141,21 @@ public abstract class ActivityBase extends PFSeqActivity {
 
         // create piano roll items
         PFSeqTimeOffset zeroQuarterNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 1, 0, false, -1);
-        PFSeqPianoRollItem zeroQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_QUARTER_NOTE, zeroQuarterNotesFromBarStart);
+        PFSeqPianoRollItem zeroQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_QUARTER_NOTE, zeroQuarterNotesFromBarStart, null);
         PFSeqTimeOffset oneSixteenthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 1, false, -1);
-        PFSeqPianoRollItem oneSixteenthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_SIXTEENTH_NOTE, oneSixteenthNoteFromBarStart);
+        PFSeqPianoRollItem oneSixteenthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_SIXTEENTH_NOTE, oneSixteenthNoteFromBarStart, null);
         PFSeqTimeOffset oneEigthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 2, 1, false, -1);
-        PFSeqPianoRollItem oneEighthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_EIGHTH_NOTE, oneEigthNoteFromBarStart);
+        PFSeqPianoRollItem oneEighthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_EIGHTH_NOTE, oneEigthNoteFromBarStart, null);
         PFSeqTimeOffset threeSixteenthNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 3, false, -1);
-        PFSeqPianoRollItem threeSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_SIXTEENTH_NOTE, threeSixteenthNotesFromBarStart);
+        PFSeqPianoRollItem threeSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_SIXTEENTH_NOTE, threeSixteenthNotesFromBarStart, null);
         PFSeqTimeOffset oneQuarterNoteFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 1, 0, false, -1);
-        PFSeqPianoRollItem oneQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, SECOND_QUARTER_NOTE, oneQuarterNoteFromBarStart);
+        PFSeqPianoRollItem oneQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, SECOND_QUARTER_NOTE, oneQuarterNoteFromBarStart, null);
         PFSeqTimeOffset fiveSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 1, false, -1);
-        PFSeqPianoRollItem fiveSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, FIFTH_SIXTEENTH_NOTE, fiveSixteenthNotesFromBarStart);
+        PFSeqPianoRollItem fiveSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, FIFTH_SIXTEENTH_NOTE, fiveSixteenthNotesFromBarStart, null);
         PFSeqTimeOffset threeEighthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 2, 1, false, -1);
-        PFSeqPianoRollItem threeEighthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_EIGHTH_NOTE, threeEighthNotesFromBarStart);
+        PFSeqPianoRollItem threeEighthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_EIGHTH_NOTE, threeEighthNotesFromBarStart, null);
         PFSeqTimeOffset sevenSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 3, false, -1);
-        PFSeqPianoRollItem sevenSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, SEVENTH_SIXTEENTH_NOTE, sevenSixteenthNotesFromBarStart);
+        PFSeqPianoRollItem sevenSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, SEVENTH_SIXTEENTH_NOTE, sevenSixteenthNotesFromBarStart, null);
 
         // add pr items to track
         PFSeqTrack metronomeTrack = new PFSeqTrack(seq, TRACK_NAME);
