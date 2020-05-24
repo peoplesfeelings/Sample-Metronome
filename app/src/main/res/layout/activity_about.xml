@@ -19,6 +19,19 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/border_box_padding_and_margin"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:src="@drawable/thing360_3" />
+            </LinearLayout>
+
             <TextView
                 android:text="@string/txtPreLicense"
                 android:layout_width="match_parent"
@@ -27,6 +40,15 @@
                 android:layout_margin="@dimen/border_box_padding_and_margin"
                 android:padding="@dimen/border_box_padding_and_margin"
                 android:id="@+id/textView1" />
+
+            <TextView
+                android:id="@+id/linkTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_box"
+                android:padding="@dimen/border_box_padding_and_margin"
+                android:layout_margin="@dimen/border_box_padding_and_margin"
+                android:text="@string/linkLabel" />
 
             <TextView
                 android:text="@string/directoryInstruction"

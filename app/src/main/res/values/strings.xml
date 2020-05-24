@@ -13,6 +13,7 @@
     <string name="btnStop">Stop</string>
     <string name="directoryInstruction">Add your sample files to this directory on your device: Sample_Metronome/</string>
     <string name="dialogNoFiles">No files found</string>
+    <string name="linkLabel"><u>www.peoplesfeelings.com</u></string>
     <string name="menuAbout">About</string>
     <string name="notif_channel_name">Sample Metronome</string>
     <string name="notifTitle">Metronome is playing</string>
