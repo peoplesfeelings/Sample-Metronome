@@ -141,21 +141,21 @@ public abstract class ActivityBase extends PFSeqActivity {
 
         // create piano roll items
         PFSeqTimeOffset zeroQuarterNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 1, 0, false, -1);
-        PFSeqPianoRollItem zeroQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_QUARTER_NOTE, zeroQuarterNotesFromBarStart, null);
+        PFSeqPianoRollItem zeroQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_QUARTER_NOTE, zeroQuarterNotesFromBarStart);
         PFSeqTimeOffset oneSixteenthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 1, false, -1);
-        PFSeqPianoRollItem oneSixteenthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_SIXTEENTH_NOTE, oneSixteenthNoteFromBarStart, null);
+        PFSeqPianoRollItem oneSixteenthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_SIXTEENTH_NOTE, oneSixteenthNoteFromBarStart);
         PFSeqTimeOffset oneEigthNoteFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 2, 1, false, -1);
-        PFSeqPianoRollItem oneEighthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_EIGHTH_NOTE, oneEigthNoteFromBarStart, null);
+        PFSeqPianoRollItem oneEighthNote = new PFSeqPianoRollItem(getSeq(), clip, FIRST_EIGHTH_NOTE, oneEigthNoteFromBarStart);
         PFSeqTimeOffset threeSixteenthNotesFromBarStart = PFSeqTimeOffset.make(0, MODE_FRACTIONAL, -1, 4, 3, false, -1);
-        PFSeqPianoRollItem threeSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_SIXTEENTH_NOTE, threeSixteenthNotesFromBarStart, null);
+        PFSeqPianoRollItem threeSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_SIXTEENTH_NOTE, threeSixteenthNotesFromBarStart);
         PFSeqTimeOffset oneQuarterNoteFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 1, 0, false, -1);
-        PFSeqPianoRollItem oneQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, SECOND_QUARTER_NOTE, oneQuarterNoteFromBarStart, null);
+        PFSeqPianoRollItem oneQuarterNote = new PFSeqPianoRollItem(getSeq(), clip, SECOND_QUARTER_NOTE, oneQuarterNoteFromBarStart);
         PFSeqTimeOffset fiveSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 1, false, -1);
-        PFSeqPianoRollItem fiveSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, FIFTH_SIXTEENTH_NOTE, fiveSixteenthNotesFromBarStart, null);
+        PFSeqPianoRollItem fiveSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, FIFTH_SIXTEENTH_NOTE, fiveSixteenthNotesFromBarStart);
         PFSeqTimeOffset threeEighthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 2, 1, false, -1);
-        PFSeqPianoRollItem threeEighthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_EIGHTH_NOTE, threeEighthNotesFromBarStart, null);
+        PFSeqPianoRollItem threeEighthNotes = new PFSeqPianoRollItem(getSeq(), clip, THIRD_EIGHTH_NOTE, threeEighthNotesFromBarStart);
         PFSeqTimeOffset sevenSixteenthNotesFromBarStart = PFSeqTimeOffset.make(1, MODE_FRACTIONAL, -1, 4, 3, false, -1);
-        PFSeqPianoRollItem sevenSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, SEVENTH_SIXTEENTH_NOTE, sevenSixteenthNotesFromBarStart, null);
+        PFSeqPianoRollItem sevenSixteenthNotes = new PFSeqPianoRollItem(getSeq(), clip, SEVENTH_SIXTEENTH_NOTE, sevenSixteenthNotesFromBarStart);
 
         // add pr items to track
         PFSeqTrack metronomeTrack = new PFSeqTrack(seq, TRACK_NAME);
@@ -175,7 +175,7 @@ public abstract class ActivityBase extends PFSeqActivity {
         // assumes two over four time signature
 
         if (isBound()) {
-            PFSeqTrack track = getSeq().getTrackByName(TRACK_NAME);
+            PFSeqTrack track = getSeq().getTrack(TRACK_NAME);
             if (track == null) {
                 Log.d(LOG_TAG, "setSegRate failed, track null");
                 return;
@@ -185,50 +185,50 @@ public abstract class ActivityBase extends PFSeqActivity {
                 case 0:
                     Log.d(LOG_TAG, "setSegRate ticks per beat: 0.5");
                     // ticks per beat: 0.5
-                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(false);
-                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItem(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(FIRST_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItem(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(SECOND_QUARTER_NOTE).setEnabled(false);
+                    track.getPrItem(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(THIRD_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItem(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                     break;
                 case 1:
                     Log.d(LOG_TAG, "setSegRate ticks per beat: 1");
                     // ticks per beat: 1
-                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItem(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(FIRST_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItem(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(SECOND_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItem(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(THIRD_EIGHTH_NOTE).setEnabled(false);
+                    track.getPrItem(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                     break;
                 case 2:
                     Log.d(LOG_TAG, "setSegRate ticks per beat: 2");
                     // ticks per beat: 2
-                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
-                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
-                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
-                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItem(FIRST_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(FIRST_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItem(THIRD_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(SECOND_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItem(FIFTH_SIXTEENTH_NOTE).setEnabled(false);
+                    track.getPrItem(THIRD_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItem(SEVENTH_SIXTEENTH_NOTE).setEnabled(false);
                     break;
                 case 3:
                     Log.d(LOG_TAG, "setSegRate ticks per beat: 4");
                     // ticks per beat: 4
-                    track.getPrItemByName(FIRST_QUARTER_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIRST_SIXTEENTH_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIRST_EIGHTH_NOTE).setEnabled(true);
-                    track.getPrItemByName(THIRD_SIXTEENTH_NOTE).setEnabled(true);
-                    track.getPrItemByName(SECOND_QUARTER_NOTE).setEnabled(true);
-                    track.getPrItemByName(FIFTH_SIXTEENTH_NOTE).setEnabled(true);
-                    track.getPrItemByName(THIRD_EIGHTH_NOTE).setEnabled(true);
-                    track.getPrItemByName(SEVENTH_SIXTEENTH_NOTE).setEnabled(true);
+                    track.getPrItem(FIRST_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItem(FIRST_SIXTEENTH_NOTE).setEnabled(true);
+                    track.getPrItem(FIRST_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItem(THIRD_SIXTEENTH_NOTE).setEnabled(true);
+                    track.getPrItem(SECOND_QUARTER_NOTE).setEnabled(true);
+                    track.getPrItem(FIFTH_SIXTEENTH_NOTE).setEnabled(true);
+                    track.getPrItem(THIRD_EIGHTH_NOTE).setEnabled(true);
+                    track.getPrItem(SEVENTH_SIXTEENTH_NOTE).setEnabled(true);
                     break;
             }
         }

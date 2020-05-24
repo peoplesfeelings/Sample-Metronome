@@ -60,7 +60,7 @@ public class AdapterSampleActivityList extends ArrayAdapter<ObjectFile> {
         final int position = pos;
         final PFSeqActivity pfSeqActivity = (PFSeqActivity) parent.getContext();
         PFSeq seq = pfSeqActivity.getSeq();
-        PFSeqTrack track = seq.getTrackByName(ActivityBase.TRACK_NAME);
+        PFSeqTrack track = seq.getTrack(ActivityBase.TRACK_NAME);
         final ArrayList<PFSeqPianoRollItem> pianoRoll = track.getPianoRoll();
 
         ViewHolderSampleActivityList holder = null;
